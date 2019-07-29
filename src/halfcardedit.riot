@@ -1,0 +1,170 @@
+<half-card>
+  <div class="label">
+    { props.frontOrBack }
+  </div>
+
+  <div class="maintext">
+    <span if={ !state.editing } onclick={ startEdit }>{ state.text }</span>
+    <form if={ state.editing } onsubmit={ enterText }>
+      <input
+        id="mainfield"
+        type="text"
+        autocomplete="off"
+        oninput={ editText }
+        value={ state.text }/>
+    </form>
+  </div>
+
+  <div class="synonyms">
+    <span class="syn" each={ (syn, i) in state.synonyms}>
+      {syn}
+      <span class="xbutton" onclick={ (e) => removeSyn(i) }>x</span>
+    </span>
+    <form if={ state.addingSyn } onsubmit={ submitSyn }>
+      <input
+        id="synfield"
+        type="text"
+        autocomplete="off"
+        oninput={ editNewSyn }
+        value={ state.newSyn }/>
+        <button type="submit">Submit</button>
+    </form>
+    <button if={ !state.addingSyn } onclick={ startAddingSyn }>Add synonym</button>
+  </div>
+
+  <style>
+    .label {
+      position: absolute;
+      left: 0.5em;
+      top: 0.25em;
+      text-transform: capitalize;
+      font-size: 3rem;
+      opacity: 0.5;
+    }
+
+    .synonyms {
+      font-size: 0.5em;
+    }
+
+    .synonyms button {
+      border: none;
+    }
+
+    .syn {
+      padding: 0.1em 0.2em;
+    }
+
+    .syn .xbutton {
+      color: grey;
+      cursor: pointer;
+    }
+
+    .syn .xbutton:hover {
+      color: #FF6860;
+    }
+
+    .syn::after {
+      content: ", ";
+    }
+
+    .syn:last-of-type::after {
+      content: "";
+    }
+
+    .maintext form {
+      margin-bottom: 0;
+    }
+
+    .maintext input, .synonyms input {
+      background-color: transparent;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+      border-color: #5b5b5b;
+    }
+
+    .maintext input {
+      text-align: center;
+      height: 1.2em;
+    }
+
+    .maintext input:focus, .synonyms input:focus {
+      border-top: none;
+      border-left: none;
+      border-right: none;
+    }
+
+    .synonyms input {
+      font-size: 0.7em;
+    }
+
+    .synonyms form {
+      display: inline;
+    }
+  </style>
+
+  <script>
+  export default {
+    onBeforeMount() {
+      this.state = {
+        text: this.props.text,
+        synonyms: this.props.synonyms || [],
+        editing: true,
+        addingSyn: false,
+        newSyn: '',
+      }
+    },
+
+    startEdit() {
+      this.update({
+        editing: true
+      })
+      this.$('#mainfield').focus()
+    },
+
+    editText(e) {
+      this.update({
+        text: e.target.value
+      })
+      this.props.onChangeText(this.state.text)
+    },
+
+    enterText(e) {
+      e.preventDefault()
+      this.update({
+        editing: false
+      })
+    },
+
+    removeSyn(i) {
+      this.props.onRemoveSyn(i)
+    },
+
+    startAddingSyn(e) {
+      e.preventDefault()
+      this.update({
+        addingSyn: true,
+      })
+      this.$('#synfield').focus()
+    },
+
+    editNewSyn(e) {
+      this.update({
+        newSyn: e.target.value
+      })
+    },
+
+    submitSyn(e) {
+      e.preventDefault()
+
+      this.update({
+        addingSyn: false,
+      })
+
+      this.props.onAddSyn(this.state.newSyn)
+    },
+
+  }
+  </script>
+
+</half-card>

@@ -1,0 +1,87 @@
+<import-exporter>
+  <div class="export">
+    <h3>Deck Export</h3>
+    <p>Select everything in the textarea below and copy it somewhere safe.</p>
+    <div>
+      <textarea>{ state.exportedDeck }</textarea>
+    </div>
+  </div>
+
+  <div class="import">
+    <h3>Import Deck</h3>
+    <p>Paste card data here.</p>
+    <div>
+      <textarea oninput={ changeImportText }>{ state.deckToImport }</textarea>
+    </div>
+    <div>
+      <button onclick={ importDeck }>Click to import cards</button>
+    </div>
+    <h5 if={state.imported}>Ok!</h5>
+  </div>
+
+  <div>
+    <button onclick={ props.onGoBack }>Go Back</button>
+  </div>
+
+  <style>
+    :host {
+      display: block;
+      text-align: center;
+    }
+
+    textarea {
+      min-width: 80%;
+    }
+  </style>
+  <script>
+  export default {
+    onBeforeMount() {
+      this.state = {
+        exportedDeck: '',
+        deckToImport: '',
+        imported: false,
+      }
+    },
+
+    onMounted() {
+      this.getDeckExport()
+    },
+
+    getDeckExport() {
+      let cards = this.props.deck.cards
+      let deck = { name: this.props.deck.name, cards: cards }
+      let exportedDeck = JSON.stringify(deck)
+      this.update({
+        exportedDeck: exportedDeck
+      })
+    },
+
+    importDeck() {
+      const deckToImport = this.state.deckToImport
+      const importedDeck = JSON.parse(deckToImport)
+
+      const newName = importedDeck.name
+      const importedCards = importedDeck.cards
+
+      let currentDeck = this.props.deck
+      currentDeck.cards = []
+
+      importedCards.forEach((card) => {
+        currentDeck.addCard(card)
+      })
+
+      this.props.deck.changeName(newName)
+
+      this.props.updateDeck()
+
+      this.update({ imported: true })
+    },
+
+    changeImportText(e) {
+      this.update({
+        deckToImport: e.target.value
+      })
+    },
+  }
+  </script>
+</import-exporter>

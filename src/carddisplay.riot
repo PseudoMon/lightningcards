@@ -1,0 +1,188 @@
+<card-display>
+  <div class="card {state.cardClasses}">
+    <div class="question">
+    { props.card.front }
+    </div>
+    <div if={!state.asking} class="answer">
+      {props.card.back }
+    </div>
+    <div if={!state.asking} class="synonym">
+      <span class="syn" each={syn in state.card.synBack}>{syn}</span>
+    </div>
+  </div>
+
+  <div if={ state.asking } class="card-answer asking">
+    <form>
+      <input
+        id="answerinput"
+        oninput={ changeAnswer }
+        type="text"
+        autocomplete="off"
+        placeholder="Answer"
+      >
+      <button onclick={ enterAnswer } class="button-primary">Enter</button>
+    </form>
+  </div>
+
+  <div if={ !state.asking } class="card-answer answered">
+    <button class="button" onclick={ startEditing }>Edit card</button>
+    <button id="nextbutton" onclick={ nextCard } class="button-primary">Next</button>
+  </div>
+
+  <style>
+    .card {
+      text-align: center;
+      font-size: 5rem;
+      width: 80%;
+      margin: 2.5rem auto;
+      padding: 0 2rem;
+      border-radius: 5px;
+      background-color: #eeeeee;
+      box-shadow: 5px 5px #8f8989;
+      height: 300px;
+
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .card.correct {
+      background-color: #bcf15b;
+      color: #231717;
+    }
+
+    .card.wrong {
+      background-color: #FF6860;
+      color: #563737;
+    }
+
+    .card.wrong .answer {
+      color: #fff;
+    }
+
+    .answered .question {
+      font-size: 0.8em;
+      opacity: 0.5;
+    }
+
+    .answered .synonym {
+      font-size: 0.5em;
+    }
+
+    .syn {
+      padding: 0.1em 0.2em;
+    }
+
+    .syn::after {
+      content: ", ";
+    }
+
+    .syn:last-of-type::after {
+      content: "";
+    }
+
+    .card-answer {
+      width: 80%;
+      margin: 1rem auto;
+      padding: 0 0.5rem;
+      text-align: center;
+    }
+
+    .card-answer.answered button {
+      margin: 0 2em;
+    }
+
+    .card-answer input {
+      width: 80%;
+      text-align: center;
+    }
+
+    .card-answer.asking .button-primary {
+      width: 60%;
+    }
+  </style>
+
+  <script>
+  export default {
+    onBeforeMount() {
+      this.state = {
+        card: this.props.card,
+        answerBox: '',
+        cardClasses: '',
+        asking: true,
+        correct: false,
+      }
+    },
+
+    onUpdated() {
+      if (!this.state.asking) {
+        this.$('#nextbutton').focus()
+      }
+      else if (this.state.asking) {
+        this.$('#answerinput').focus()
+      }
+    },
+
+    changeAnswer(e) {
+      this.update({
+          answerBox: e.target.value
+      })
+    },
+
+    enterAnswer(e) {
+      e.preventDefault()
+
+      let answer = String(this.state.answerBox).toLowerCase()
+      if (!answer) {
+        return
+      }
+
+      let card = String(this.props.card.back).toLowerCase()
+      let synonyms = this.props.card.synBack.map((syn) => syn.toLowerCase())
+
+      if ( answer === card || synonyms.includes(answer) ) {
+        this.answerCorrect()
+      }
+      else {
+        this.answerWrong()
+      }
+    },
+
+    answerCorrect() {
+      this.props.card.addRight()
+      this.update({
+        cardClasses: 'answered correct',
+        asking: false,
+        correct: true
+      })
+    },
+
+    answerWrong() {
+      this.props.card.addWrong()
+      this.update({
+        cardClasses: 'answered wrong',
+        asking: false,
+        correct: false
+      })
+    },
+
+    nextCard(e) {
+      e.preventDefault()
+
+      this.update({
+        cardClasses: '',
+        asking: true,
+      })
+      this.props.loadNextCard()
+    },
+
+    startEditing(e) {
+      e.preventDefault()
+      this.props.editCard()
+    }
+  }
+
+  </script>
+
+
+</card-display>

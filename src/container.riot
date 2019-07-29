@@ -1,0 +1,69 @@
+<container>
+  <div>
+    <notification>{ state.notificationMessage }</notification>
+
+    <headnav title="Lightning Cards" update-deck={updateDeck} deck={props.deck}></headnav>
+
+    <deck-edit-container
+      deck={ props.deck }
+      update-deck={ updateDeck }
+    >
+    </deck-edit-container>
+
+    <!-- Somehow I can't use if={true} in the main container??
+         This is just a workaround. Annoying! -->
+    <!-- <smh
+      show={!state.outOfCards}
+      card={state.cardBeingShown}
+      load-next-card={loadNextCard}
+      update-deck={updateDeck}
+    ></smh> -->
+
+
+
+  </div>
+
+  <style>
+    :host {
+      display: block;
+      margin-top: 20px;
+    }
+  </style>
+
+  <script>
+  export default {
+    onBeforeMount() {
+      this.props.deck.shuffleAllCards()
+      let firstcard = this.props.deck.drawCard()
+
+      this.state = {
+        cardBeingShown: firstcard,
+        outOfCards: false,
+        notificationMessage: '',
+      }
+    },
+
+    updateDeck() {
+      this.update()
+    },
+
+    loadNextCard() {
+      let nextCard = this.props.deck.drawCard()
+
+      if (nextCard !== undefined) {
+        this.update({
+          cardBeingShown: nextCard,
+        })
+      }
+
+      else {
+        this.update({
+          outOfCards: true
+        })
+      }
+    }
+    //TODO: shuffling new deck when current deck has ran out of cards
+  }
+  </script>
+
+</container>

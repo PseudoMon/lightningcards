@@ -1,0 +1,29 @@
+<headnav>
+    <div>{ props.title }</div>
+    <div>1/2/20 Cards</div>
+
+  <style>
+    :host {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      height: 60px;
+    }
+
+    h1 {line-height: 60px; }
+    div {line-height: 60px; }
+
+  </style>
+
+  <script>
+    export default {
+      onMounted() {
+        let thisCard = this.props.deck.cards[0]
+        thisCard.addRight()
+        this.props.updateDeck()
+      }
+
+      //TODO: proper right/wrong/total number
+    }
+  </script>
+</headnav>

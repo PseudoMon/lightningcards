@@ -1,0 +1,52 @@
+<smh>
+  <card-display
+    if= { !state.editing }
+    card={props.card}
+    edit-card={ startEditing }
+    load-next-card={ props.loadNextCard }
+    update-deck={ props.updateDeck }
+  >
+  </card-display>
+  <card-edit
+    if={ state.editing }
+    card={props.card}
+    finish-editing={ finishEditing }
+    update-deck={props.updateDeck}
+  ></card-edit>
+
+  <script>
+  export default {
+    onBeforeMount() {
+      this.state = {
+        editing: false,
+      }
+    },
+
+    onMounted() {
+      // Give warning window whenever user try to leave
+      // window.onbeforeunload = function() {
+      //     return true;
+      // };
+    },
+
+    onBeforeUnmount() {
+      // window.onbeforeunload = function() {
+      //     return false;
+      // };
+    },
+
+    finishEditing() {
+      this.update({
+        editing: false,
+      })
+    },
+
+    startEditing() {
+      this.update({
+        editing: true,
+      })
+    },
+    //TODO: changing/removing synonyms
+  }
+  </script>
+</smh>

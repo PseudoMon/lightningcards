@@ -1,0 +1,75 @@
+<deck-edit-container>
+  <card-list if={ !state.editingCard && !state.isImportExporting }
+    deck={ props.deck }
+    on-add-new-card={ addNewCard }
+    update-deck={ props.updateDeck }
+    on-open-import-exporter={ openImportExporter }
+    on-click-card={ (i) => this.editCard(i) }
+  >
+  </card-list>
+
+  <card-edit
+    if={ state.editingCard }
+    card={ state.editingCard }
+    finish-editing={ finishEditing }
+    update-deck={ props.updateDeck }
+  ></card-edit>
+
+  <import-exporter
+    if={ state.isImportExporting }
+    deck={ props.deck }
+    update-deck={ props.updateDeck }
+    on-go-back={ finishImportExporting }
+  >
+  </import-exporter>
+
+
+  <script>
+    const CardList = require('./cardlist.riot').default
+    const { register } = require('riot')
+
+    register('card-list', CardList)
+
+  export default {
+    onBeforeMount() {
+      this.state = {
+        editingCard: false,
+        isImportExporting: false,
+      }
+    },
+
+    editCard(i) {
+      this.update({
+        editingCard: this.props.deck.cards[i]
+      })
+    },
+
+    finishEditing() {
+      this.update({
+        editingCard: false,
+        addingNewCard: false,
+      })
+    },
+
+    addNewCard() {
+      let newCard = this.props.deck.addCard({})
+      this.update({
+        editingCard: newCard
+      })
+    },
+
+    openImportExporter() {
+      this.update({
+        isImportExporting: true,
+      })
+    },
+
+    finishImportExporting() {
+      this.update({
+        isImportExporting: false,
+      })
+    }
+  }
+
+  </script>
+</deck-edit-container>

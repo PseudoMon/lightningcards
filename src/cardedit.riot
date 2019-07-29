@@ -1,0 +1,122 @@
+<card-edit>
+  <div class="card editing">
+    <div class="half top">
+      <half-card
+        front-or-back='front'
+        text={ state.front }
+        synonyms={ state.synFront }
+        on-change-text={ (data) => changeText('front', data) }
+        on-remove-syn={ (i) => removeSyn('front', i) }
+        on-add-syn={ (newSyn) => addSyn('front', newSyn) }
+      >
+      </half-card>
+    </div>
+
+    <div class="half bottom">
+      <half-card
+        front-or-back='back'
+        text={ state.back }
+        synonyms={ state.synBack }
+        on-change-text={ (data) => changeText('back', data) }
+        on-remove-syn={ (i) => removeSyn('back', i) }
+        on-add-syn={ (newSyn) => addSyn('back', newSyn) }
+      >
+      </half-card>
+    </div>
+  </div>
+
+  <div class="buttons" onclick={ onFinishEditing }><button>Save card</button></div>
+
+  <style>
+    .card {
+      text-align: center;
+      font-size: 5rem;
+      width: 80%;
+      margin: 1.5rem auto;
+      height: 400px;
+
+    }
+
+    .half {
+      position: relative;
+      padding: 0 2rem;
+      box-sizing: border-box;
+      border-radius: 5px;
+      box-shadow: 2px 2px #8f8989;
+      margin: 1rem;
+
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      height: 50%;
+    }
+
+    .half.top {
+      background-color: #eeeeee;
+    }
+
+    .half.bottom {
+      background-color: #bdccff;
+    }
+
+    .buttons {
+      width: 80%;
+      margin: 3rem auto;
+      padding: 0 0.5rem;
+      text-align: center;
+    }
+  </style>
+
+  <script>
+  const HalfCard = require('./halfcardedit.riot').default
+  const { register } = require('riot')
+  register('half-card', HalfCard)
+
+  export default {
+    onBeforeMount() {
+      this.state = {
+        front: this.props.card.front,
+        synFront: this.props.card.synFront || null,
+        back: this.props.card.back,
+        synBack: this.props.card.synBack || null,
+        editingTop: false,
+        editingBottom: true,
+      }
+    },
+
+    changeText(frontOrBack, data) {
+      if (frontOrBack === 'front') {
+        this.update({
+          front: data
+        })
+      }
+      else if (frontOrBack === 'back') {
+        this.update({
+          back: data
+        })
+      }
+    },
+
+    removeSyn(side, i) {
+      this.props.card.removeSyn(side, i)
+      this.props.updateDeck()
+    },
+
+    addSyn(side, newSyn) {
+      this.props.card.addSyn(side, newSyn)
+      this.props.updateDeck()
+    },
+
+    onFinishEditing(e) {
+      e.preventDefault()
+
+      this.props.card.changeFront(this.state.front)
+      this.props.card.changeBack(this.state.back)
+      this.props.finishEditing()
+    },
+
+
+  }
+  </script>
+
+</card-edit>

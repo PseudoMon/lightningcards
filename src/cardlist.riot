@@ -1,0 +1,157 @@
+<card-list>
+  <h2 class="deckname">
+    <span if={ !state.editingName }>{ state.name }</span>
+    <form if={ state.editingName } onsubmit={ enterName }>
+      <input
+        id="namefield"
+        type="text"
+        name="newname"
+        autocomplete="off"
+        value={ state.name }/>
+    </form>
+  </h2>
+
+  <div class="header">
+    <button onclick={ startEditingName }>Edit Deck Name</button>
+    <button onclick={ props.onAddNewCard }>Add New Card</button>
+    <button onclick={ props.onOpenImportExporter }>Import/Export Deck</button>
+  </div>
+
+  <div class="cardlist">
+    <div
+    class="smallcard"
+    onclick={ clickCard }
+    each={ (card, i) in state.cards }
+    data-cardindex={ i }
+    >
+
+      <div class="xbutton" onclick={ removeCard } onmouseover={ hoverX } onmouseleave={ unhoverX }>
+        x
+      </div>
+
+      <div class="front" data-cardindex={ i }>
+        { card.front }
+      </div>
+
+      <div class="back" data-cardindex={ i }>
+        { card.back }
+      </div>
+
+    </div>
+  </div>
+
+  <style>
+    .cardlist {
+      margin-top: 10px;
+      display: flex;
+      flex-flow: row wrap;
+      justify-content: center;
+    }
+
+    .smallcard {
+      background-color: #bdccff;
+      border-radius: 3px;
+      box-shadow: 1px 1px #8f8989;
+
+      width: 30%;
+      min-width: 160px;
+      min-height: 6em;
+      padding: 0.2em;
+      margin: 0.5em;
+      cursor: pointer;
+      text-align: center;
+
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+    }
+
+    .smallcard:hover {
+      background-color: #bcf15b;
+      color: #231717;
+    }
+
+    .smallcard .front {
+      font-size: 1.3em;
+    }
+
+    .smallcard.red, .smallcard.red.hover {
+      background-color: #FF6860;
+      color: #563737;
+    }
+
+    .xbutton {
+      position: absolute;
+      font-size: 1.2em;
+      top: 0;
+      right: 0.4em;
+    }
+
+    .header {
+      text-align: center;
+    }
+
+    .header button {
+      margin: 0.5em 1em;
+    }
+
+    .deckname input {
+      background-color: transparent;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+      border-color: #5b5b5b;
+      height: 1.2em;
+    }
+
+  </style>
+
+  <script>
+  export default {
+    onBeforeMount() {
+      this.state = {
+        cards: this.props.deck.cards,
+        name: this.props.deck.name,
+        editingName: false,
+      }
+    },
+
+    clickCard(e) {
+      const cardIndex = e.target.dataset.cardindex
+      this.props.onClickCard(cardIndex)
+    },
+
+    enterName(e) {
+      e.preventDefault()
+
+      this.props.deck.changeName(e.target.newname.value)
+      this.props.updateDeck()
+
+      this.update({ name: this.props.deck.name, editingName: false })
+    },
+
+    startEditingName() {
+      this.update({
+        editingName: true
+      })
+      this.$('#namefield').focus()
+    },
+
+    hoverX(e) {
+      e.target.style.color = "#fff"
+      e.target.parentNode.className = "smallcard red"
+    },
+
+    unhoverX(e) {
+      e.target.style.color = "initial"
+      e.target.parentNode.className ="smallcard"
+    },
+
+    removeCard(e) {
+      const cardIndex = e.target.parentNode.dataset.cardindex
+      this.props.deck.removeCard(cardIndex)
+    },
+  }
+  </script>
+</card-list>
