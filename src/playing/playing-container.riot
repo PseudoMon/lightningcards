@@ -1,10 +1,11 @@
-<smh>
+<playing-container>
   <div if={ props.show }>
 
   <card-display
     if= { !state.editing }
     card={props.card}
     edit-card={ startEditing }
+    session={ props.session }
     load-next-card={ props.loadNextCard }
     update-deck={ props.updateDeck }
   >
@@ -19,6 +20,10 @@
   <div>
 
   <script>
+    const CardDisplay = require('./carddisplay.riot').default
+    const { register } = require('riot')
+    register('card-display', CardDisplay)
+
   export default {
     onBeforeMount() {
       this.state = {
@@ -26,23 +31,24 @@
       }
     },
 
-    onMounted() {
-      // Give warning window whenever user try to leave
-      // window.onbeforeunload = function() {
-      //     return true;
-      // };
-    },
-
-    onBeforeUnmount() {
-      // window.onbeforeunload = function() {
-      //     return false;
-      // };
-    },
+    // onMounted() {
+    //   // Give warning window whenever user try to leave
+    //   window.onbeforeunload = function() {
+    //       return true;
+    //   };
+    // },
+    //
+    // onBeforeUnmount() {
+    //   window.onbeforeunload = function() {
+    //       return false;
+    //   };
+    // },
 
     finishEditing() {
       this.update({
         editing: false,
       })
+      this.props.loadNextCard()
     },
 
     startEditing() {
@@ -53,4 +59,4 @@
     //TODO: changing/removing synonyms
   }
   </script>
-</smh>
+</playing-container>

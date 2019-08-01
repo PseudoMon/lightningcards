@@ -150,6 +150,10 @@
 
     answerCorrect() {
       this.props.card.addRight()
+      this.props.session.correctCounter++
+      this.props.session.playedCounter++
+      this.props.updateDeck()
+
       this.update({
         cardClasses: 'answered correct',
         asking: false,
@@ -159,6 +163,9 @@
 
     answerWrong() {
       this.props.card.addWrong()
+      this.props.session.playedCounter++
+      this.props.updateDeck()
+
       this.update({
         cardClasses: 'answered wrong',
         asking: false,

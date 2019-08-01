@@ -1,6 +1,14 @@
 <headnav>
     <div>{ props.title }</div>
-    <div>1/2/20 Cards</div>
+    <div class="sessioncounter">
+      <span class="correct">
+        { props.session.correctCounter }
+      </span>/<span class="wrong">
+        { props.session.playedCounter }
+      </span>/<span class="total">
+        { props.session.totalCount } Cards
+      </span>
+     </div>
 
   <style>
     :host {
@@ -15,15 +23,4 @@
 
   </style>
 
-  <script>
-    export default {
-      onMounted() {
-        let thisCard = this.props.deck.cards[0]
-        thisCard.addRight()
-        this.props.updateDeck()
-      }
-
-      //TODO: proper right/wrong/total number
-    }
-  </script>
 </headnav>

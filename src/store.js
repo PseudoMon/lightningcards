@@ -120,13 +120,17 @@ class Deck {
   // Deck contains all the cards that can be played.
   // "100 French Words" or "JLPT N4 Vocabulary" would be a Deck
   // The deck of cards currently being played
-  // whereas cards are shuffled and drawn from
-  // is cardsInDeck
+  // is in currentSession.deck
 
   constructor(cards) {
     this.name = "Untitled Deck"
     this.cards = cards || sampleCards
-    this.cardsInDeck = this.cards.slice(0)
+    this.currentSession = {
+      deck: this.cards.slice(0),
+      correctCounter: 0,
+      playedCounter: 0,
+    }
+    this.currentSession.totalCount = this.cards.length
   }
 
   addCard(cardData) {
@@ -137,12 +141,13 @@ class Deck {
 
   shuffleAllCards() {
     let allCards = this.cards.slice(0)
-    this.cardsInDeck = shuffle(allCards)
+    this.currentSession.deck = shuffle(allCards)
+    this.currentSession.totalCount = allCards.length
   }
 
   drawCard() {
     // return a card from the end and remove it from the deck
-    return this.cardsInDeck.pop()
+    return this.currentSession.deck.pop()
   }
 
   removeCard(i) {
@@ -168,7 +173,6 @@ class Deck {
 
     // Shuffling the new deck
     this.shuffleAllCards()
-    console.log(this.cardsInDeck)
   }
 }
 

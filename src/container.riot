@@ -6,7 +6,10 @@
           The workaround is to use `show` prop on screen containers,
           and then manually configure that into those containers.-->
 
-    <headnav title="Lightning Cards" update-deck={updateDeck} deck={props.deck}></headnav>
+    <headnav
+      title="Lightning Cards"
+      session={ props.deck.currentSession }>
+    </headnav>
 
     <main-menu
       show={ state.currentScreen === 'main menu' ? true : false }
@@ -23,13 +26,13 @@
     >
     </deck-edit-container>
 
-    <smh
+    <playing-container
       show={ state.currentScreen === 'playing' ? true : false }
       card={state.cardBeingShown}
-      load-next-card={loadNextCard}
-      update-deck={updateDeck}
-    ></smh>
-
+      session={ props.deck.currentSession }
+      load-next-card={ loadNextCard }
+      update-deck={ updateDeck }
+    ></playing-container>
 
 
   </div>

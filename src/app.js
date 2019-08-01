@@ -1,9 +1,8 @@
 const Container = require('./container.riot').default
 const HeadNav = require('./headnav.riot').default
 const ImportExporter = require('./importexporter.riot').default
-const CardDisplay = require('./carddisplay.riot').default
 const CardEdit = require('./cardedit.riot').default
-const Smh = require('./smh.riot').default
+const PlayingContainer = require('./playing/playing-container.riot').default
 const DeckEditContainer = require('./deckeditcontainer.riot').default
 const MainMenu = require('./main-menu.riot').default
 
@@ -20,9 +19,8 @@ const deck = require('./store.js')
 register('container', Container)
 register('headnav', HeadNav)
 register('import-exporter', ImportExporter)
-register('card-display', CardDisplay)
 register('card-edit', CardEdit)
-register('smh', Smh)
+register('playing-container', PlayingContainer)
 register('deck-edit-container', DeckEditContainer)
 register('main-menu', MainMenu)
 
