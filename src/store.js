@@ -153,6 +153,26 @@ class Deck {
     // Shuffling the new deck
     this.shuffleAllCards()
   }
+
+  saveToLocalStorage() {
+    //holy shit is it really this easy??
+    let cards = this.cards
+    let deck = { name: this.name, cards: cards }
+    let exportedDeck = JSON.stringify(deck)
+    localStorage.setItem("deck", exportedDeck)
+  }
+
+  getFromLocalStorage() {
+    const deckToImport = localStorage.getItem("deck")
+
+    // If there's no data stored, return
+    if (!deckToImport) { return }
+
+    // Else, import it
+    const importedDeck = JSON.parse(deckToImport)
+
+    this.replaceDeck(importedDeck)
+  }
 }
 
 const currentDeck = new Deck(sampleCards)

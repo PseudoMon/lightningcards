@@ -2530,6 +2530,7 @@ var _default = {
   'css': `container,[is="container"]{ display: block; margin-top: 20px; }`,
   'exports': {
     onBeforeMount() {
+      this.props.deck.getFromLocalStorage();
       this.props.deck.shuffleAllCards();
       let firstcard = this.props.deck.drawCard();
       this.state = {
@@ -2541,6 +2542,7 @@ var _default = {
     },
 
     updateDeck() {
+      this.props.deck.saveToLocalStorage();
       this.update();
     },
 
@@ -2577,7 +2579,7 @@ var _default = {
 
   },
   'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<div><notification expr639></notification><headnav expr640 title="Lightning Cards"></headnav><main-menu expr641></main-menu><deck-edit-container expr642></deck-edit-container><playing-container expr643></playing-container></div>', [{
+    return template('<div><notification expr653></notification><headnav expr654 title="Lightning Cards"></headnav><main-menu expr655></main-menu><deck-edit-container expr656></deck-edit-container><playing-container expr657></playing-container></div>', [{
       'type': bindingTypes.TAG,
       'getComponent': getComponent,
       'evaluate': function (scope) {
@@ -2597,8 +2599,8 @@ var _default = {
         }]
       }],
       'attributes': [],
-      'redundantAttribute': 'expr639',
-      'selector': '[expr639]'
+      'redundantAttribute': 'expr653',
+      'selector': '[expr653]'
     }, {
       'type': bindingTypes.TAG,
       'getComponent': getComponent,
@@ -2619,8 +2621,8 @@ var _default = {
           return scope.props.deck.currentSession;
         }
       }],
-      'redundantAttribute': 'expr640',
-      'selector': '[expr640]'
+      'redundantAttribute': 'expr654',
+      'selector': '[expr654]'
     }, {
       'type': bindingTypes.TAG,
       'getComponent': getComponent,
@@ -2653,8 +2655,8 @@ var _default = {
           return () => scope.openScreen('deck view');
         }
       }],
-      'redundantAttribute': 'expr641',
-      'selector': '[expr641]'
+      'redundantAttribute': 'expr655',
+      'selector': '[expr655]'
     }, {
       'type': bindingTypes.TAG,
       'getComponent': getComponent,
@@ -2687,8 +2689,8 @@ var _default = {
           return () => scope.openScreen('main menu');
         }
       }],
-      'redundantAttribute': 'expr642',
-      'selector': '[expr642]'
+      'redundantAttribute': 'expr656',
+      'selector': '[expr656]'
     }, {
       'type': bindingTypes.TAG,
       'getComponent': getComponent,
@@ -2745,8 +2747,8 @@ var _default = {
           return () => scope.openScreen('deck view');
         }
       }],
-      'redundantAttribute': 'expr643',
-      'selector': '[expr643]'
+      'redundantAttribute': 'expr657',
+      'selector': '[expr657]'
     }]);
   },
   'name': 'container'
@@ -4211,6 +4213,26 @@ class Deck {
 
     // Shuffling the new deck
     this.shuffleAllCards()
+  }
+
+  saveToLocalStorage() {
+    //holy shit is it really this easy??
+    let cards = this.cards
+    let deck = { name: this.name, cards: cards }
+    let exportedDeck = JSON.stringify(deck)
+    localStorage.setItem("deck", exportedDeck)
+  }
+
+  getFromLocalStorage() {
+    const deckToImport = localStorage.getItem("deck")
+
+    // If there's no data stored, return
+    if (!deckToImport) { return }
+
+    // Else, import it
+    const importedDeck = JSON.parse(deckToImport)
+
+    this.replaceDeck(importedDeck)
   }
 }
 

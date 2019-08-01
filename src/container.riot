@@ -50,6 +50,8 @@
   <script>
   export default {
     onBeforeMount() {
+      this.props.deck.getFromLocalStorage()
+      
       this.props.deck.shuffleAllCards()
       let firstcard = this.props.deck.drawCard()
 
@@ -62,6 +64,7 @@
     },
 
     updateDeck() {
+      this.props.deck.saveToLocalStorage()
       this.update()
     },
 

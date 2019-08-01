@@ -5,7 +5,7 @@ This app is partly inspired by [Anki](https://apps.ankiweb.net/), a pretty good 
 
 I made Lightning Cards because I want to have a flashcard app where I can quickly make my own cards and just quickly play through them. This is probably my largest coding project so far, since it's the first web app I made that I've worked on for more than a few days.
 
-At the moment, the app is usable with basic functionalities built in. It doesn't yet locally save your deck, but you can manually export the deck data as JSON and import it later.
+At the moment, the app is usable with basic functionalities built in. It saves your deck locally, but you can also manually export the deck data as JSON, keep it elsewhere, and import it later.
 
 # The Big To-Do List:
 - Routing
@@ -15,6 +15,7 @@ At the moment, the app is usable with basic functionalities built in. It doesn't
 - Error notification
 - Add Less preprocessing (for easier recoloring, etc)
 - Spaced repetition system
+- More keyboard shortcuts
 
 # Running the thing
 I've set up `npm start` to get Browserify to watch the source files and automatically build everything into `bundle.js`.
