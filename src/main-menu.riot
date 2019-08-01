@@ -1,0 +1,34 @@
+<main-menu>
+
+  <div if={ props.show }>
+
+    <h3>Welcome to Lightning Cards</h3>
+    <div>
+      <p>Your currently loaded deck is
+        <span class="decktitle">{ props.currentDeckTitle }</span>
+      </p>
+    </div>
+    <div>
+      <button onclick={ props.onStartPractice }>Start Practice</button>
+      <button onclick={ props.onSeeDeck }>See/Edit Deck</button>
+    </div>
+  </div>
+
+  <style>
+    :host { text-align: center; }
+
+    :host h3 {
+      margin-top: 100px;
+      /* I'd put this in .mainmenu or :host, but if screws this up */
+    }
+
+    button { margin: 1em; }
+
+    .decktitle {
+      font-weight: 500;
+    }
+
+  </style>
+
+
+</main-menu>

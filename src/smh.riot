@@ -1,4 +1,6 @@
 <smh>
+  <div if={ props.show }>
+
   <card-display
     if= { !state.editing }
     card={props.card}
@@ -13,6 +15,8 @@
     finish-editing={ finishEditing }
     update-deck={props.updateDeck}
   ></card-edit>
+
+  <div>
 
   <script>
   export default {

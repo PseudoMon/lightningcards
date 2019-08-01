@@ -4,8 +4,8 @@
   "description": "",
   "main": "app.js",
   "dependencies": {
-    "riotify": "^4.0.0",
-    "riot": "^4.3.5"
+    "riot": "^4.3.5",
+    "riotify": "^4.0.0"
   },
   "devDependencies": {},
   "scripts": {

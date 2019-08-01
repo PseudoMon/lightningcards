@@ -152,6 +152,24 @@ class Deck {
   changeName(newName) {
     this.name = newName
   }
+
+  replaceDeck(deckData) {
+    // Changing name
+    this.changeName(deckData.name)
+    const newCards = deckData.cards
+
+    // Emptying cards in the Deck
+    this.cards = []
+
+    // Putting in all the new cards
+    newCards.forEach((card) => {
+      this.addCard(card)
+    })
+
+    // Shuffling the new deck
+    this.shuffleAllCards()
+    console.log(this.cardsInDeck)
+  }
 }
 
 const currentDeck = new Deck(sampleCards)

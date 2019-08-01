@@ -1,10 +1,14 @@
 <deck-edit-container>
+
+  <div if={ props.show }>
+
   <card-list if={ !state.editingCard && !state.isImportExporting }
     deck={ props.deck }
     on-add-new-card={ addNewCard }
     update-deck={ props.updateDeck }
     on-open-import-exporter={ openImportExporter }
     on-click-card={ (i) => this.editCard(i) }
+    on-back-to-menu={ props.onBackToMenu }
   >
   </card-list>
 
@@ -22,6 +26,8 @@
     on-go-back={ finishImportExporting }
   >
   </import-exporter>
+
+  </div>
 
 
   <script>

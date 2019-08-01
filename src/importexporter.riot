@@ -60,18 +60,7 @@
       const deckToImport = this.state.deckToImport
       const importedDeck = JSON.parse(deckToImport)
 
-      const newName = importedDeck.name
-      const importedCards = importedDeck.cards
-
-      let currentDeck = this.props.deck
-      currentDeck.cards = []
-
-      importedCards.forEach((card) => {
-        currentDeck.addCard(card)
-      })
-
-      this.props.deck.changeName(newName)
-
+      this.props.deck.replaceDeck(importedDeck)
       this.props.updateDeck()
 
       this.update({ imported: true })

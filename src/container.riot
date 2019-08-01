@@ -2,22 +2,33 @@
   <div>
     <notification>{ state.notificationMessage }</notification>
 
+    <!-- Somehow I can't use if={true} in this main container.
+          The workaround is to use `show` prop on screen containers,
+          and then manually configure that into those containers.-->
+
     <headnav title="Lightning Cards" update-deck={updateDeck} deck={props.deck}></headnav>
 
+    <main-menu
+      show={ state.currentScreen === 'main menu' ? true : false }
+      current-deck-title={ props.deck.name }
+      on-start-practice={ () => openScreen('playing') }
+      on-see-deck={ () => openScreen('deck view') }
+    ></main-menu>
+
     <deck-edit-container
+      show={ state.currentScreen === 'deck view' ? true : false }
       deck={ props.deck }
       update-deck={ updateDeck }
+      onBackToMenu={ () => openScreen('main menu') }
     >
     </deck-edit-container>
 
-    <!-- Somehow I can't use if={true} in the main container??
-         This is just a workaround. Annoying! -->
-    <!-- <smh
-      show={!state.outOfCards}
+    <smh
+      show={ state.currentScreen === 'playing' ? true : false }
       card={state.cardBeingShown}
       load-next-card={loadNextCard}
       update-deck={updateDeck}
-    ></smh> -->
+    ></smh>
 
 
 
@@ -37,6 +48,7 @@
       let firstcard = this.props.deck.drawCard()
 
       this.state = {
+        currentScreen: 'main menu',
         cardBeingShown: firstcard,
         outOfCards: false,
         notificationMessage: '',
@@ -45,6 +57,7 @@
 
     updateDeck() {
       this.update()
+      console.log(this.props)
     },
 
     loadNextCard() {
@@ -61,8 +74,17 @@
           outOfCards: true
         })
       }
-    }
-    //TODO: shuffling new deck when current deck has ran out of cards
+    },
+
+    openScreen (screen) {
+      if (screen === 'deck view' || screen === 'main menu' || screen === 'playing') {
+        this.update({
+          currentScreen: screen
+        })
+      } else {
+        // Put error notification
+      }
+    },
   }
   </script>
 
