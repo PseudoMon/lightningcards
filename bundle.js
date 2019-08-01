@@ -2542,7 +2542,6 @@ var _default = {
 
     updateDeck() {
       this.update();
-      console.log(this.props);
     },
 
     loadNextCard() {
@@ -2578,7 +2577,7 @@ var _default = {
 
   },
   'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<div><notification expr634></notification><headnav expr635 title="Lightning Cards"></headnav><main-menu expr636></main-menu><deck-edit-container expr637></deck-edit-container><playing-container expr638></playing-container></div>', [{
+    return template('<div><notification expr639></notification><headnav expr640 title="Lightning Cards"></headnav><main-menu expr641></main-menu><deck-edit-container expr642></deck-edit-container><playing-container expr643></playing-container></div>', [{
       'type': bindingTypes.TAG,
       'getComponent': getComponent,
       'evaluate': function (scope) {
@@ -2598,8 +2597,8 @@ var _default = {
         }]
       }],
       'attributes': [],
-      'redundantAttribute': 'expr634',
-      'selector': '[expr634]'
+      'redundantAttribute': 'expr639',
+      'selector': '[expr639]'
     }, {
       'type': bindingTypes.TAG,
       'getComponent': getComponent,
@@ -2620,8 +2619,8 @@ var _default = {
           return scope.props.deck.currentSession;
         }
       }],
-      'redundantAttribute': 'expr635',
-      'selector': '[expr635]'
+      'redundantAttribute': 'expr640',
+      'selector': '[expr640]'
     }, {
       'type': bindingTypes.TAG,
       'getComponent': getComponent,
@@ -2654,8 +2653,8 @@ var _default = {
           return () => scope.openScreen('deck view');
         }
       }],
-      'redundantAttribute': 'expr636',
-      'selector': '[expr636]'
+      'redundantAttribute': 'expr641',
+      'selector': '[expr641]'
     }, {
       'type': bindingTypes.TAG,
       'getComponent': getComponent,
@@ -2688,8 +2687,8 @@ var _default = {
           return () => scope.openScreen('main menu');
         }
       }],
-      'redundantAttribute': 'expr637',
-      'selector': '[expr637]'
+      'redundantAttribute': 'expr642',
+      'selector': '[expr642]'
     }, {
       'type': bindingTypes.TAG,
       'getComponent': getComponent,
@@ -2746,8 +2745,8 @@ var _default = {
           return () => scope.openScreen('deck view');
         }
       }],
-      'redundantAttribute': 'expr638',
-      'selector': '[expr638]'
+      'redundantAttribute': 'expr643',
+      'selector': '[expr643]'
     }]);
   },
   'name': 'container'
@@ -3560,16 +3559,16 @@ var _default = {
   'css': `main-menu,[is="main-menu"]{ text-align: center; } main-menu h3,[is="main-menu"] h3{ margin-top: 100px; } main-menu button,[is="main-menu"] button{ margin: 1em; } main-menu .decktitle,[is="main-menu"] .decktitle{ font-weight: 500; }`,
   'exports': null,
   'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<div expr76></div>', [{
+    return template('<div expr644></div>', [{
       'type': bindingTypes.IF,
       'evaluate': function (scope) {
         return scope.props.show;
       },
-      'redundantAttribute': 'expr76',
-      'selector': '[expr76]',
-      'template': template('<h3>Welcome to Lightning Cards</h3><div><p>Your currently loaded deck is\r\n        <span expr77 class="decktitle"><!----></span></p></div><div><button expr78>Start Practice</button><button expr79>See/Edit Deck</button></div>', [{
-        'redundantAttribute': 'expr77',
-        'selector': '[expr77]',
+      'redundantAttribute': 'expr644',
+      'selector': '[expr644]',
+      'template': template('<h3>Welcome to Lightning Cards</h3><div><p>Your currently loaded deck is\r\n        <span expr645 class="decktitle"><!----></span></p></div><div><button expr646>Start Practice</button><button expr647>See/Edit Deck</button></div>', [{
+        'redundantAttribute': 'expr645',
+        'selector': '[expr645]',
         'expressions': [{
           'type': expressionTypes.TEXT,
           'childNodeIndex': 0,
@@ -3578,8 +3577,8 @@ var _default = {
           }
         }]
       }, {
-        'redundantAttribute': 'expr78',
-        'selector': '[expr78]',
+        'redundantAttribute': 'expr646',
+        'selector': '[expr646]',
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onclick',
@@ -3588,8 +3587,8 @@ var _default = {
           }
         }]
       }, {
-        'redundantAttribute': 'expr79',
-        'selector': '[expr79]',
+        'redundantAttribute': 'expr647',
+        'selector': '[expr647]',
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onclick',
@@ -4133,46 +4132,19 @@ class Card {
 
 let sampleCards = [
   new Card({
-    front: "bonjour",
-    back: "good day",
-    synFront: ["bonne journée"]
+    front: "éclair",
+    back: "flash of lightning",
+    synBack: ["lightning"]
   }),
   new Card({
-    front: "bonsoir",
-    back: "good evening",
-    synBack: ["good night"]
+    front: "雷",
+    back: "thunder",
+    synBack: ["thunder", "lightning", "thunderbolt"]
   }),
   new Card({
-    front: "semain",
-    back: "week",
-  }),
-  new Card({
-    front: "année",
-    back: "year",
-  }),
-  new Card({
-    front: "pendule",
-    back: "clock",
-  }),
-  new Card({
-    front: "venir",
-    back: "come",
-  }),
-  new Card({
-    front: "laid",
-    back: "ugly",
-  }),
-  new Card({
-    front: "travailler",
-    back: "work",
-  }),
-  new Card({
-    front: "tasse de café",
-    back: "cup of coffee",
-  }),
-  new Card({
-    front: "mettre",
-    back: "put",
+    front: "kilat",
+    back: "lightning",
+    synFront: ["petir"],
   })
 ]
 
@@ -4183,7 +4155,7 @@ class Deck {
   // is in currentSession.deck
 
   constructor(cards) {
-    this.name = "Untitled Deck"
+    this.name = "Sample Cards"
     this.cards = cards || sampleCards
     this.currentSession = {
       deck: this.cards.slice(0),

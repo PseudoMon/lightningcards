@@ -73,46 +73,19 @@ class Card {
 
 let sampleCards = [
   new Card({
-    front: "bonjour",
-    back: "good day",
-    synFront: ["bonne journée"]
+    front: "éclair",
+    back: "flash of lightning",
+    synBack: ["lightning"]
   }),
   new Card({
-    front: "bonsoir",
-    back: "good evening",
-    synBack: ["good night"]
+    front: "雷",
+    back: "thunder",
+    synBack: ["thunder", "lightning", "thunderbolt"]
   }),
   new Card({
-    front: "semain",
-    back: "week",
-  }),
-  new Card({
-    front: "année",
-    back: "year",
-  }),
-  new Card({
-    front: "pendule",
-    back: "clock",
-  }),
-  new Card({
-    front: "venir",
-    back: "come",
-  }),
-  new Card({
-    front: "laid",
-    back: "ugly",
-  }),
-  new Card({
-    front: "travailler",
-    back: "work",
-  }),
-  new Card({
-    front: "tasse de café",
-    back: "cup of coffee",
-  }),
-  new Card({
-    front: "mettre",
-    back: "put",
+    front: "kilat",
+    back: "lightning",
+    synFront: ["petir"],
   })
 ]
 
@@ -123,7 +96,7 @@ class Deck {
   // is in currentSession.deck
 
   constructor(cards) {
-    this.name = "Untitled Deck"
+    this.name = "Sample Cards"
     this.cards = cards || sampleCards
     this.currentSession = {
       deck: this.cards.slice(0),
