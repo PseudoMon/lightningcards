@@ -145,6 +145,12 @@ class Deck {
     this.currentSession.totalCount = allCards.length
   }
 
+  startNewSession() {
+    this.currentSession.correctCounter = 0
+    this.currentSession.playedCounter = 0
+    this.shuffleAllCards()
+  }
+
   drawCard() {
     // return a card from the end and remove it from the deck
     return this.currentSession.deck.pop()

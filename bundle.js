@@ -2329,7 +2329,7 @@ const HeadNav = require('./headnav.riot').default
 const ImportExporter = require('./importexporter.riot').default
 const CardEdit = require('./cardedit.riot').default
 const PlayingContainer = require('./playing/playing-container.riot').default
-const DeckEditContainer = require('./deckeditcontainer.riot').default
+const DeckEditContainer = require('./deck-view/deckeditcontainer.riot').default
 const MainMenu = require('./main-menu.riot').default
 
 const { registerPreprocessor, register, mount } = require('riot')
@@ -2352,7 +2352,7 @@ register('main-menu', MainMenu)
 
 mount('container', {deck: deck})
 
-},{"./cardedit.riot":3,"./container.riot":5,"./deckeditcontainer.riot":6,"./headnav.riot":8,"./importexporter.riot":9,"./main-menu.riot":10,"./playing/playing-container.riot":12,"./store.js":13,"riot":1}],3:[function(require,module,exports){
+},{"./cardedit.riot":3,"./container.riot":4,"./deck-view/deckeditcontainer.riot":6,"./headnav.riot":8,"./importexporter.riot":9,"./main-menu.riot":10,"./playing/playing-container.riot":13,"./store.js":14,"riot":1}],3:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2527,6 +2527,240 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 var _default = {
+  'css': `container,[is="container"]{ display: block; margin-top: 20px; }`,
+  'exports': {
+    onBeforeMount() {
+      this.props.deck.shuffleAllCards();
+      let firstcard = this.props.deck.drawCard();
+      this.state = {
+        currentScreen: 'main menu',
+        cardBeingShown: firstcard,
+        outOfCards: false,
+        notificationMessage: ''
+      };
+    },
+
+    updateDeck() {
+      this.update();
+      console.log(this.props);
+    },
+
+    loadNextCard() {
+      let nextCard = this.props.deck.drawCard();
+
+      if (nextCard !== undefined) {
+        this.update({
+          cardBeingShown: nextCard
+        });
+      } else {
+        this.update({
+          outOfCards: true
+        });
+      }
+    },
+
+    startNewSession() {
+      this.props.deck.startNewSession();
+      this.update({
+        outOfCards: false,
+        firstcard: this.props.deck.drawCard()
+      });
+    },
+
+    openScreen(screen) {
+      if (screen === 'deck view' || screen === 'main menu' || screen === 'playing') {
+        this.update({
+          currentScreen: screen
+        });
+      } else {// Put error notification
+      }
+    }
+
+  },
+  'template': function (template, expressionTypes, bindingTypes, getComponent) {
+    return template('<div><notification expr634></notification><headnav expr635 title="Lightning Cards"></headnav><main-menu expr636></main-menu><deck-edit-container expr637></deck-edit-container><playing-container expr638></playing-container></div>', [{
+      'type': bindingTypes.TAG,
+      'getComponent': getComponent,
+      'evaluate': function (scope) {
+        return 'notification';
+      },
+      'slots': [{
+        'id': 'default',
+        'html': '<!---->',
+        'bindings': [{
+          'expressions': [{
+            'type': expressionTypes.TEXT,
+            'childNodeIndex': 0,
+            'evaluate': function (scope) {
+              return scope.state.notificationMessage;
+            }
+          }]
+        }]
+      }],
+      'attributes': [],
+      'redundantAttribute': 'expr634',
+      'selector': '[expr634]'
+    }, {
+      'type': bindingTypes.TAG,
+      'getComponent': getComponent,
+      'evaluate': function (scope) {
+        return 'headnav';
+      },
+      'slots': [],
+      'attributes': [{
+        'type': expressionTypes.ATTRIBUTE,
+        'name': 'title',
+        'evaluate': function () {
+          return 'Lightning Cards';
+        }
+      }, {
+        'type': expressionTypes.ATTRIBUTE,
+        'name': 'session',
+        'evaluate': function (scope) {
+          return scope.props.deck.currentSession;
+        }
+      }],
+      'redundantAttribute': 'expr635',
+      'selector': '[expr635]'
+    }, {
+      'type': bindingTypes.TAG,
+      'getComponent': getComponent,
+      'evaluate': function (scope) {
+        return 'main-menu';
+      },
+      'slots': [],
+      'attributes': [{
+        'type': expressionTypes.ATTRIBUTE,
+        'name': 'show',
+        'evaluate': function (scope) {
+          return scope.state.currentScreen === 'main menu' ? true : false;
+        }
+      }, {
+        'type': expressionTypes.ATTRIBUTE,
+        'name': 'current-deck-title',
+        'evaluate': function (scope) {
+          return scope.props.deck.name;
+        }
+      }, {
+        'type': expressionTypes.EVENT,
+        'name': 'on-start-practice',
+        'evaluate': function (scope) {
+          return () => scope.openScreen('playing');
+        }
+      }, {
+        'type': expressionTypes.EVENT,
+        'name': 'on-see-deck',
+        'evaluate': function (scope) {
+          return () => scope.openScreen('deck view');
+        }
+      }],
+      'redundantAttribute': 'expr636',
+      'selector': '[expr636]'
+    }, {
+      'type': bindingTypes.TAG,
+      'getComponent': getComponent,
+      'evaluate': function (scope) {
+        return 'deck-edit-container';
+      },
+      'slots': [],
+      'attributes': [{
+        'type': expressionTypes.ATTRIBUTE,
+        'name': 'show',
+        'evaluate': function (scope) {
+          return scope.state.currentScreen === 'deck view' ? true : false;
+        }
+      }, {
+        'type': expressionTypes.ATTRIBUTE,
+        'name': 'deck',
+        'evaluate': function (scope) {
+          return scope.props.deck;
+        }
+      }, {
+        'type': expressionTypes.ATTRIBUTE,
+        'name': 'update-deck',
+        'evaluate': function (scope) {
+          return scope.updateDeck;
+        }
+      }, {
+        'type': expressionTypes.EVENT,
+        'name': 'onBackToMenu',
+        'evaluate': function (scope) {
+          return () => scope.openScreen('main menu');
+        }
+      }],
+      'redundantAttribute': 'expr637',
+      'selector': '[expr637]'
+    }, {
+      'type': bindingTypes.TAG,
+      'getComponent': getComponent,
+      'evaluate': function (scope) {
+        return 'playing-container';
+      },
+      'slots': [],
+      'attributes': [{
+        'type': expressionTypes.ATTRIBUTE,
+        'name': 'show',
+        'evaluate': function (scope) {
+          return scope.state.currentScreen === 'playing' ? true : false;
+        }
+      }, {
+        'type': expressionTypes.ATTRIBUTE,
+        'name': 'card',
+        'evaluate': function (scope) {
+          return scope.state.cardBeingShown;
+        }
+      }, {
+        'type': expressionTypes.ATTRIBUTE,
+        'name': 'out-of-cards',
+        'evaluate': function (scope) {
+          return scope.state.outOfCards;
+        }
+      }, {
+        'type': expressionTypes.ATTRIBUTE,
+        'name': 'session',
+        'evaluate': function (scope) {
+          return scope.props.deck.currentSession;
+        }
+      }, {
+        'type': expressionTypes.ATTRIBUTE,
+        'name': 'load-next-card',
+        'evaluate': function (scope) {
+          return scope.loadNextCard;
+        }
+      }, {
+        'type': expressionTypes.ATTRIBUTE,
+        'name': 'update-deck',
+        'evaluate': function (scope) {
+          return scope.updateDeck;
+        }
+      }, {
+        'type': expressionTypes.EVENT,
+        'name': 'on-practice-again',
+        'evaluate': function (scope) {
+          return scope.startNewSession;
+        }
+      }, {
+        'type': expressionTypes.EVENT,
+        'name': 'on-edit-deck',
+        'evaluate': function (scope) {
+          return () => scope.openScreen('deck view');
+        }
+      }],
+      'redundantAttribute': 'expr638',
+      'selector': '[expr638]'
+    }]);
+  },
+  'name': 'container'
+};
+exports.default = _default;
+},{}],5:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+var _default = {
   'css': `card-list .cardlist,[is="card-list"] .cardlist{ margin-top: 10px; display: flex; flex-flow: row wrap; justify-content: center; } card-list .smallcard,[is="card-list"] .smallcard{ background-color: #bdccff; border-radius: 3px; box-shadow: 1px 1px #8f8989; width: 30%; min-width: 160px; min-height: 6em; padding: 0.2em; margin: 0.5em; cursor: pointer; text-align: center; display: flex; flex-direction: column; justify-content: center; position: relative; } card-list .smallcard:hover,[is="card-list"] .smallcard:hover{ background-color: #bcf15b; color: #231717; } card-list .smallcard .front,[is="card-list"] .smallcard .front{ font-size: 1.3em; } card-list .smallcard.red,[is="card-list"] .smallcard.red,card-list .smallcard.red.hover,[is="card-list"] .smallcard.red.hover{ background-color: #FF6860; color: #563737; } card-list .xbutton,[is="card-list"] .xbutton{ position: absolute; font-size: 1.2em; top: 0; right: 0.4em; } card-list .header,[is="card-list"] .header{ text-align: center; } card-list .header button,[is="card-list"] .header button{ margin: 0.5em 1em; } card-list .deckname input,[is="card-list"] .deckname input{ background-color: transparent; border-top: none; border-left: none; border-right: none; border-color: #5b5b5b; height: 1.2em; }`,
   'exports': {
     onBeforeMount() {
@@ -2576,13 +2810,13 @@ var _default = {
 
   },
   'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<h2 class="deckname"><span expr36></span><form expr37></form></h2><div class="header"><button expr39>Back to menu</button><button expr40>Edit Deck Name</button><button expr41>Add New Card</button><button expr42>Import/Export Deck</button></div><div class="cardlist"><div expr43 class="smallcard"></div></div>', [{
+    return template('<h2 class="deckname"><span expr415></span><form expr416></form></h2><div class="header"><button expr418>Back to menu</button><button expr419>Edit Deck Name</button><button expr420>Add New Card</button><button expr421>Import/Export Deck</button></div><div class="cardlist"><div expr422 class="smallcard"></div></div>', [{
       'type': bindingTypes.IF,
       'evaluate': function (scope) {
         return !scope.state.editingName;
       },
-      'redundantAttribute': 'expr36',
-      'selector': '[expr36]',
+      'redundantAttribute': 'expr415',
+      'selector': '[expr415]',
       'template': template('<!---->', [{
         'expressions': [{
           'type': expressionTypes.TEXT,
@@ -2597,9 +2831,9 @@ var _default = {
       'evaluate': function (scope) {
         return scope.state.editingName;
       },
-      'redundantAttribute': 'expr37',
-      'selector': '[expr37]',
-      'template': template('<input expr38 id="namefield" type="text" name="newname" autocomplete="off"/>', [{
+      'redundantAttribute': 'expr416',
+      'selector': '[expr416]',
+      'template': template('<input expr417 id="namefield" type="text" name="newname" autocomplete="off"/>', [{
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onsubmit',
@@ -2608,8 +2842,8 @@ var _default = {
           }
         }]
       }, {
-        'redundantAttribute': 'expr38',
-        'selector': '[expr38]',
+        'redundantAttribute': 'expr417',
+        'selector': '[expr417]',
         'expressions': [{
           'type': expressionTypes.VALUE,
           'evaluate': function (scope) {
@@ -2618,8 +2852,8 @@ var _default = {
         }]
       }])
     }, {
-      'redundantAttribute': 'expr39',
-      'selector': '[expr39]',
+      'redundantAttribute': 'expr418',
+      'selector': '[expr418]',
       'expressions': [{
         'type': expressionTypes.EVENT,
         'name': 'onclick',
@@ -2628,8 +2862,8 @@ var _default = {
         }
       }]
     }, {
-      'redundantAttribute': 'expr40',
-      'selector': '[expr40]',
+      'redundantAttribute': 'expr419',
+      'selector': '[expr419]',
       'expressions': [{
         'type': expressionTypes.EVENT,
         'name': 'onclick',
@@ -2638,8 +2872,8 @@ var _default = {
         }
       }]
     }, {
-      'redundantAttribute': 'expr41',
-      'selector': '[expr41]',
+      'redundantAttribute': 'expr420',
+      'selector': '[expr420]',
       'expressions': [{
         'type': expressionTypes.EVENT,
         'name': 'onclick',
@@ -2648,8 +2882,8 @@ var _default = {
         }
       }]
     }, {
-      'redundantAttribute': 'expr42',
-      'selector': '[expr42]',
+      'redundantAttribute': 'expr421',
+      'selector': '[expr421]',
       'expressions': [{
         'type': expressionTypes.EVENT,
         'name': 'onclick',
@@ -2661,7 +2895,7 @@ var _default = {
       'type': bindingTypes.EACH,
       'getKey': null,
       'condition': null,
-      'template': template('<div expr44 class="xbutton">\r\n        x\r\n      </div><div expr45 class="front"><!----></div><div expr46 class="back"><!----></div>', [{
+      'template': template('<div expr423 class="xbutton">\r\n        x\r\n      </div><div expr424 class="front"><!----></div><div expr425 class="back"><!----></div>', [{
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onclick',
@@ -2676,8 +2910,8 @@ var _default = {
           }
         }]
       }, {
-        'redundantAttribute': 'expr44',
-        'selector': '[expr44]',
+        'redundantAttribute': 'expr423',
+        'selector': '[expr423]',
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onclick',
@@ -2698,8 +2932,8 @@ var _default = {
           }
         }]
       }, {
-        'redundantAttribute': 'expr45',
-        'selector': '[expr45]',
+        'redundantAttribute': 'expr424',
+        'selector': '[expr424]',
         'expressions': [{
           'type': expressionTypes.TEXT,
           'childNodeIndex': 0,
@@ -2714,8 +2948,8 @@ var _default = {
           }
         }]
       }, {
-        'redundantAttribute': 'expr46',
-        'selector': '[expr46]',
+        'redundantAttribute': 'expr425',
+        'selector': '[expr425]',
         'expressions': [{
           'type': expressionTypes.TEXT,
           'childNodeIndex': 0,
@@ -2730,8 +2964,8 @@ var _default = {
           }
         }]
       }]),
-      'redundantAttribute': 'expr43',
-      'selector': '[expr43]',
+      'redundantAttribute': 'expr422',
+      'selector': '[expr422]',
       'itemName': 'card',
       'indexName': 'i',
       'evaluate': function (scope) {
@@ -2740,214 +2974,6 @@ var _default = {
     }]);
   },
   'name': 'card-list'
-};
-exports.default = _default;
-},{}],5:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-var _default = {
-  'css': `container,[is="container"]{ display: block; margin-top: 20px; }`,
-  'exports': {
-    onBeforeMount() {
-      this.props.deck.shuffleAllCards();
-      let firstcard = this.props.deck.drawCard();
-      this.state = {
-        currentScreen: 'main menu',
-        cardBeingShown: firstcard,
-        outOfCards: false,
-        notificationMessage: ''
-      };
-    },
-
-    updateDeck() {
-      this.update();
-      console.log(this.props);
-    },
-
-    loadNextCard() {
-      let nextCard = this.props.deck.drawCard();
-
-      if (nextCard !== undefined) {
-        this.update({
-          cardBeingShown: nextCard
-        });
-      } else {
-        this.update({
-          outOfCards: true
-        });
-      }
-    },
-
-    openScreen(screen) {
-      if (screen === 'deck view' || screen === 'main menu' || screen === 'playing') {
-        this.update({
-          currentScreen: screen
-        });
-      } else {// Put error notification
-      }
-    }
-
-  },
-  'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<div><notification expr275></notification><headnav expr276 title="Lightning Cards"></headnav><main-menu expr277></main-menu><deck-edit-container expr278></deck-edit-container><playing-container expr279></playing-container></div>', [{
-      'type': bindingTypes.TAG,
-      'getComponent': getComponent,
-      'evaluate': function (scope) {
-        return 'notification';
-      },
-      'slots': [{
-        'id': 'default',
-        'html': '<!---->',
-        'bindings': [{
-          'expressions': [{
-            'type': expressionTypes.TEXT,
-            'childNodeIndex': 0,
-            'evaluate': function (scope) {
-              return scope.state.notificationMessage;
-            }
-          }]
-        }]
-      }],
-      'attributes': [],
-      'redundantAttribute': 'expr275',
-      'selector': '[expr275]'
-    }, {
-      'type': bindingTypes.TAG,
-      'getComponent': getComponent,
-      'evaluate': function (scope) {
-        return 'headnav';
-      },
-      'slots': [],
-      'attributes': [{
-        'type': expressionTypes.ATTRIBUTE,
-        'name': 'title',
-        'evaluate': function () {
-          return 'Lightning Cards';
-        }
-      }, {
-        'type': expressionTypes.ATTRIBUTE,
-        'name': 'session',
-        'evaluate': function (scope) {
-          return scope.props.deck.currentSession;
-        }
-      }],
-      'redundantAttribute': 'expr276',
-      'selector': '[expr276]'
-    }, {
-      'type': bindingTypes.TAG,
-      'getComponent': getComponent,
-      'evaluate': function (scope) {
-        return 'main-menu';
-      },
-      'slots': [],
-      'attributes': [{
-        'type': expressionTypes.ATTRIBUTE,
-        'name': 'show',
-        'evaluate': function (scope) {
-          return scope.state.currentScreen === 'main menu' ? true : false;
-        }
-      }, {
-        'type': expressionTypes.ATTRIBUTE,
-        'name': 'current-deck-title',
-        'evaluate': function (scope) {
-          return scope.props.deck.name;
-        }
-      }, {
-        'type': expressionTypes.EVENT,
-        'name': 'on-start-practice',
-        'evaluate': function (scope) {
-          return () => scope.openScreen('playing');
-        }
-      }, {
-        'type': expressionTypes.EVENT,
-        'name': 'on-see-deck',
-        'evaluate': function (scope) {
-          return () => scope.openScreen('deck view');
-        }
-      }],
-      'redundantAttribute': 'expr277',
-      'selector': '[expr277]'
-    }, {
-      'type': bindingTypes.TAG,
-      'getComponent': getComponent,
-      'evaluate': function (scope) {
-        return 'deck-edit-container';
-      },
-      'slots': [],
-      'attributes': [{
-        'type': expressionTypes.ATTRIBUTE,
-        'name': 'show',
-        'evaluate': function (scope) {
-          return scope.state.currentScreen === 'deck view' ? true : false;
-        }
-      }, {
-        'type': expressionTypes.ATTRIBUTE,
-        'name': 'deck',
-        'evaluate': function (scope) {
-          return scope.props.deck;
-        }
-      }, {
-        'type': expressionTypes.ATTRIBUTE,
-        'name': 'update-deck',
-        'evaluate': function (scope) {
-          return scope.updateDeck;
-        }
-      }, {
-        'type': expressionTypes.EVENT,
-        'name': 'onBackToMenu',
-        'evaluate': function (scope) {
-          return () => scope.openScreen('main menu');
-        }
-      }],
-      'redundantAttribute': 'expr278',
-      'selector': '[expr278]'
-    }, {
-      'type': bindingTypes.TAG,
-      'getComponent': getComponent,
-      'evaluate': function (scope) {
-        return 'playing-container';
-      },
-      'slots': [],
-      'attributes': [{
-        'type': expressionTypes.ATTRIBUTE,
-        'name': 'show',
-        'evaluate': function (scope) {
-          return scope.state.currentScreen === 'playing' ? true : false;
-        }
-      }, {
-        'type': expressionTypes.ATTRIBUTE,
-        'name': 'card',
-        'evaluate': function (scope) {
-          return scope.state.cardBeingShown;
-        }
-      }, {
-        'type': expressionTypes.ATTRIBUTE,
-        'name': 'session',
-        'evaluate': function (scope) {
-          return scope.props.deck.currentSession;
-        }
-      }, {
-        'type': expressionTypes.ATTRIBUTE,
-        'name': 'load-next-card',
-        'evaluate': function (scope) {
-          return scope.loadNextCard;
-        }
-      }, {
-        'type': expressionTypes.ATTRIBUTE,
-        'name': 'update-deck',
-        'evaluate': function (scope) {
-          return scope.updateDeck;
-        }
-      }],
-      'redundantAttribute': 'expr279',
-      'selector': '[expr279]'
-    }]);
-  },
-  'name': 'container'
 };
 exports.default = _default;
 },{}],6:[function(require,module,exports){
@@ -3009,20 +3035,20 @@ var _default = {
 
   },
   'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<div expr4></div>', [{
+    return template('<div expr411></div>', [{
       'type': bindingTypes.IF,
       'evaluate': function (scope) {
         return scope.props.show;
       },
-      'redundantAttribute': 'expr4',
-      'selector': '[expr4]',
-      'template': template('<card-list expr5></card-list><card-edit expr6></card-edit><import-exporter expr7></import-exporter>', [{
+      'redundantAttribute': 'expr411',
+      'selector': '[expr411]',
+      'template': template('<card-list expr412></card-list><card-edit expr413></card-edit><import-exporter expr414></import-exporter>', [{
         'type': bindingTypes.IF,
         'evaluate': function (scope) {
           return !scope.state.editingCard && !scope.state.isImportExporting;
         },
-        'redundantAttribute': 'expr5',
-        'selector': '[expr5]',
+        'redundantAttribute': 'expr412',
+        'selector': '[expr412]',
         'template': template(null, [{
           'type': bindingTypes.TAG,
           'getComponent': getComponent,
@@ -3073,8 +3099,8 @@ var _default = {
         'evaluate': function (scope) {
           return scope.state.editingCard;
         },
-        'redundantAttribute': 'expr6',
-        'selector': '[expr6]',
+        'redundantAttribute': 'expr413',
+        'selector': '[expr413]',
         'template': template(null, [{
           'type': bindingTypes.TAG,
           'getComponent': getComponent,
@@ -3107,8 +3133,8 @@ var _default = {
         'evaluate': function (scope) {
           return scope.state.isImportExporting;
         },
-        'redundantAttribute': 'expr7',
-        'selector': '[expr7]',
+        'redundantAttribute': 'expr414',
+        'selector': '[expr414]',
         'template': template(null, [{
           'type': bindingTypes.TAG,
           'getComponent': getComponent,
@@ -3142,7 +3168,7 @@ var _default = {
   'name': 'deck-edit-container'
 };
 exports.default = _default;
-},{"./cardlist.riot":4,"riot":1}],7:[function(require,module,exports){
+},{"./cardlist.riot":5,"riot":1}],7:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3800,14 +3826,74 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
+var _default = {
+  'css': `end-screen,[is="end-screen"]{ text-align: center; } end-screen h3,[is="end-screen"] h3{ margin-top: 50px; } end-screen button,[is="end-screen"] button{ margin: 1em; }`,
+  'exports': {
+    onBeforeMount() {
+      let correctCounter = this.props.session.correctCounter;
+      let totalCount = this.props.session.totalCount;
+      this.state = {
+        correctCounter: correctCounter,
+        totalCount: totalCount,
+        percentCorrect: Math.floor(correctCounter / totalCount * 100)
+      };
+    }
+
+  },
+  'template': function (template, expressionTypes, bindingTypes, getComponent) {
+    return template('<h3>Session done!</h3><p expr621><!----></p><div><button expr622>Practice again</button><button expr623>Edit deck</button></div>', [{
+      'redundantAttribute': 'expr621',
+      'selector': '[expr621]',
+      'expressions': [{
+        'type': expressionTypes.TEXT,
+        'childNodeIndex': 0,
+        'evaluate': function (scope) {
+          return ['You\'ve gone through all the cards in your deck. You got ', scope.state.correctCounter, ' correct out of ', scope.state.totalCount, ' (', scope.state.percentCorrect, '%).'].join('');
+        }
+      }]
+    }, {
+      'redundantAttribute': 'expr622',
+      'selector': '[expr622]',
+      'expressions': [{
+        'type': expressionTypes.EVENT,
+        'name': 'onclick',
+        'evaluate': function (scope) {
+          return scope.props.onPracticeAgain;
+        }
+      }]
+    }, {
+      'redundantAttribute': 'expr623',
+      'selector': '[expr623]',
+      'expressions': [{
+        'type': expressionTypes.EVENT,
+        'name': 'onclick',
+        'evaluate': function (scope) {
+          return scope.props.onEditDeck;
+        }
+      }]
+    }]);
+  },
+  'name': 'end-screen'
+};
+exports.default = _default;
+},{}],13:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
 
 const CardDisplay = require('./carddisplay.riot').default;
+
+const EndScreen = require('./end-screen.riot').default;
 
 const {
   register
 } = require('riot');
 
 register('card-display', CardDisplay);
+register('end-screen', EndScreen);
 var _default = {
   'css': null,
   'exports': {
@@ -3836,7 +3922,6 @@ var _default = {
       this.props.loadNextCard();
     },
 
-    //TODO: changing/removing synonyms
     startEditing() {
       this.update({
         editing: true
@@ -3845,20 +3930,20 @@ var _default = {
 
   },
   'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<div expr399></div>', [{
+    return template('<div expr589></div>', [{
       'type': bindingTypes.IF,
       'evaluate': function (scope) {
         return scope.props.show;
       },
-      'redundantAttribute': 'expr399',
-      'selector': '[expr399]',
-      'template': template('<card-display expr400></card-display><card-edit expr401></card-edit><div></div>', [{
+      'redundantAttribute': 'expr589',
+      'selector': '[expr589]',
+      'template': template('<card-display expr590></card-display><card-edit expr591></card-edit><end-screen expr592></end-screen><div></div>', [{
         'type': bindingTypes.IF,
         'evaluate': function (scope) {
-          return !scope.state.editing;
+          return !scope.state.editing && !scope.props.outOfCards;
         },
-        'redundantAttribute': 'expr400',
-        'selector': '[expr400]',
+        'redundantAttribute': 'expr590',
+        'selector': '[expr590]',
         'template': template(null, [{
           'type': bindingTypes.TAG,
           'getComponent': getComponent,
@@ -3903,8 +3988,8 @@ var _default = {
         'evaluate': function (scope) {
           return scope.state.editing;
         },
-        'redundantAttribute': 'expr401',
-        'selector': '[expr401]',
+        'redundantAttribute': 'expr591',
+        'selector': '[expr591]',
         'template': template(null, [{
           'type': bindingTypes.TAG,
           'getComponent': getComponent,
@@ -3932,13 +4017,47 @@ var _default = {
             }
           }]
         }])
+      }, {
+        'type': bindingTypes.IF,
+        'evaluate': function (scope) {
+          return scope.props.outOfCards;
+        },
+        'redundantAttribute': 'expr592',
+        'selector': '[expr592]',
+        'template': template(null, [{
+          'type': bindingTypes.TAG,
+          'getComponent': getComponent,
+          'evaluate': function (scope) {
+            return 'end-screen';
+          },
+          'slots': [],
+          'attributes': [{
+            'type': expressionTypes.ATTRIBUTE,
+            'name': 'session',
+            'evaluate': function (scope) {
+              return scope.props.session;
+            }
+          }, {
+            'type': expressionTypes.EVENT,
+            'name': 'on-practice-again',
+            'evaluate': function (scope) {
+              return scope.props.onPracticeAgain;
+            }
+          }, {
+            'type': expressionTypes.EVENT,
+            'name': 'on-edit-deck',
+            'evaluate': function (scope) {
+              return scope.props.onEditDeck;
+            }
+          }]
+        }])
       }])
     }]);
   },
   'name': 'playing-container'
 };
 exports.default = _default;
-},{"./carddisplay.riot":11,"riot":1}],13:[function(require,module,exports){
+},{"./carddisplay.riot":11,"./end-screen.riot":12,"riot":1}],14:[function(require,module,exports){
 // Utility function to shuffle array
 // Using the Fisher-Yates shuffle
 // Thanks academia!
@@ -4084,6 +4203,12 @@ class Deck {
     let allCards = this.cards.slice(0)
     this.currentSession.deck = shuffle(allCards)
     this.currentSession.totalCount = allCards.length
+  }
+
+  startNewSession() {
+    this.currentSession.correctCounter = 0
+    this.currentSession.playedCounter = 0
+    this.shuffleAllCards()
   }
 
   drawCard() {

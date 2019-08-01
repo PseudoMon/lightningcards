@@ -1,0 +1,34 @@
+<end-screen>
+
+  <h3>Session done!</h3>
+  <p>You've gone through all the cards in your deck. You got { state.correctCounter } correct out of { state.totalCount } ({ state.percentCorrect }%).</p>
+  <div><button onclick={ props.onPracticeAgain }>Practice again</button>
+  <button onclick={ props.onEditDeck }>Edit deck</button></div>
+
+  <style>
+  :host {
+    text-align: center;
+  }
+  h3 {
+    margin-top: 50px;
+  }
+  button {
+    margin: 1em;
+  }
+  </style>
+
+  <script>
+  export default {
+    onBeforeMount() {
+      let correctCounter  = this.props.session.correctCounter
+      let totalCount = this.props.session.totalCount
+
+      this.state = {
+        correctCounter: correctCounter,
+        totalCount: totalCount,
+        percentCorrect: Math.floor( (correctCounter / totalCount)*100 )
+      }
+    },
+  }
+  </script>
+</end-screen>

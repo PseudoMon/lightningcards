@@ -29,9 +29,12 @@
     <playing-container
       show={ state.currentScreen === 'playing' ? true : false }
       card={state.cardBeingShown}
+      out-of-cards={ state.outOfCards}
       session={ props.deck.currentSession }
       load-next-card={ loadNextCard }
       update-deck={ updateDeck }
+      on-practice-again={ startNewSession }
+      on-edit-deck={ () => openScreen('deck view') }
     ></playing-container>
 
 
@@ -77,6 +80,15 @@
           outOfCards: true
         })
       }
+    },
+
+    startNewSession() {
+      this.props.deck.startNewSession()
+
+      this.update({
+        outOfCards: false,
+        firstcard: this.props.deck.drawCard()
+      })
     },
 
     openScreen (screen) {

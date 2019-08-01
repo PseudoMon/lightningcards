@@ -2,7 +2,7 @@
   <div if={ props.show }>
 
   <card-display
-    if= { !state.editing }
+    if= { !state.editing && !props.outOfCards }
     card={props.card}
     edit-card={ startEditing }
     session={ props.session }
@@ -10,19 +10,29 @@
     update-deck={ props.updateDeck }
   >
   </card-display>
+
   <card-edit
     if={ state.editing }
-    card={props.card}
+    card={ props.card }
     finish-editing={ finishEditing }
     update-deck={props.updateDeck}
   ></card-edit>
+
+  <end-screen
+    if={ props.outOfCards }
+    session={ props.session }
+    on-practice-again={ props.onPracticeAgain }
+    on-edit-deck={ props.onEditDeck }
+  ></end-screen>
 
   <div>
 
   <script>
     const CardDisplay = require('./carddisplay.riot').default
+    const EndScreen = require('./end-screen.riot').default
     const { register } = require('riot')
     register('card-display', CardDisplay)
+    register('end-screen', EndScreen)
 
   export default {
     onBeforeMount() {
@@ -56,7 +66,7 @@
         editing: true,
       })
     },
-    //TODO: changing/removing synonyms
+
   }
   </script>
 </playing-container>

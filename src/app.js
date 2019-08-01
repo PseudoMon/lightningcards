@@ -3,7 +3,7 @@ const HeadNav = require('./headnav.riot').default
 const ImportExporter = require('./importexporter.riot').default
 const CardEdit = require('./cardedit.riot').default
 const PlayingContainer = require('./playing/playing-container.riot').default
-const DeckEditContainer = require('./deckeditcontainer.riot').default
+const DeckEditContainer = require('./deck-view/deckeditcontainer.riot').default
 const MainMenu = require('./main-menu.riot').default
 
 const { registerPreprocessor, register, mount } = require('riot')
