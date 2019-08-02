@@ -51,7 +51,7 @@
   export default {
     onBeforeMount() {
       this.props.deck.getFromLocalStorage()
-      
+
       this.props.deck.shuffleAllCards()
       let firstcard = this.props.deck.drawCard()
 
@@ -89,11 +89,15 @@
 
       this.update({
         outOfCards: false,
-        firstcard: this.props.deck.drawCard()
+        cardBeingShown: this.props.deck.drawCard()
       })
     },
 
     openScreen (screen) {
+      if (screen === 'playing') {
+        this.startNewSession()
+      }
+
       if (screen === 'deck view' || screen === 'main menu' || screen === 'playing') {
         this.update({
           currentScreen: screen

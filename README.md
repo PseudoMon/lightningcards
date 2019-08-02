@@ -16,6 +16,7 @@ At the moment, the app is usable with basic functionalities built in. It saves y
 - Add Less preprocessing (for easier recoloring, etc)
 - Spaced repetition system
 - More keyboard shortcuts
+- Showing back fist and asking for front
 
 # Running the thing
 I've set up `npm start` to get Browserify to watch the source files and automatically build everything into `bundle.js`.

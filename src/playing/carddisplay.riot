@@ -7,7 +7,7 @@
       {props.card.back }
     </div>
     <div if={!state.asking} class="synonym">
-      <span class="syn" each={syn in state.card.synBack}>{syn}</span>
+      <span class="syn" each={syn in props.card.synBack}>{syn}</span>
     </div>
   </div>
 
@@ -106,7 +106,6 @@
   export default {
     onBeforeMount() {
       this.state = {
-        card: this.props.card,
         answerBox: '',
         cardClasses: '',
         asking: true,
