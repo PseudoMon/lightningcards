@@ -13,9 +13,8 @@ const { registerPreprocessor, register, mount } = require('riot')
 // Is this basically our back-end? Ha!
 const deck = require('./store.js')
 
-// Registering all the components
-// TODO: move the smaller components to their parents components
-// this should just be for big components and utilities
+// Registering all the main components
+// Some components are registered in their parent components' file
 register('container', Container)
 register('headnav', HeadNav)
 register('import-exporter', ImportExporter)
@@ -24,4 +23,5 @@ register('playing-container', PlayingContainer)
 register('deck-edit-container', DeckEditContainer)
 register('main-menu', MainMenu)
 
+// Mounting the main app
 mount('container', {deck: deck})

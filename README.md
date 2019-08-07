@@ -1,5 +1,5 @@
 # Lightning Cards
-Lightning Cards is a frontend-only flash card web app made with [Riot v4](https://riot.js.org). Lightning Cards is built to be simple, easy to use, and playable on both desktop and mobile.
+Lightning Cards is a frontend-only flash card web app made with [Riot v4](https://riot.js.org). Lightning Cards is built to be simple, easy to use, and playable on both+++++++++++++++++++++++++ desktop and mobile.
 
 This app is partly inspired by [Anki](https://apps.ankiweb.net/), a pretty good flash card app, but one that I just can't bring myself to use because of its complicated interface, especially when creating new cards. It's also inspired by [Wanikani](https://apps.ankiweb.net/), [Torii SRS](https://apps.ankiweb.net/), and [Duolingo](https://duolingo.com).
 
@@ -16,7 +16,7 @@ At the moment, the app is usable with basic functionalities built in. It saves y
 - Add Less preprocessing (for easier recoloring, etc)
 - Spaced repetition system
 - More keyboard shortcuts
-- Showing back fist and asking for front
+- Showing back first and asking for front
 
 # Running the thing
 I've set up `npm start` to get Browserify to watch the source files and automatically build everything into `bundle.js`.

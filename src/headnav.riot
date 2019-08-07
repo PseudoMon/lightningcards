@@ -1,5 +1,11 @@
 <headnav>
-    <div>{ props.title }</div>
+    <div class="title">{ props.title }</div>
+    <div class="navlinks">
+      <a onclick={() => props.onOpenScreen('main menu')} href="#mainmenu">Main Menu</a>
+      <a onclick={() => props.onOpenScreen('deck view')} href="#deckview">View Deck</a>
+      <a onclick={() => props.onOpenScreen('playing')} href="#playing">Start Practice</a>
+    </div>
+
     <div class="sessioncounter">
       <span class="correct">
         { props.session.correctCounter }
@@ -18,8 +24,17 @@
       height: 60px;
     }
 
+    .title { font-weight: 500; }
+
     h1 {line-height: 60px; }
     div {line-height: 60px; }
+
+
+    .navlinks a {
+      margin: 0 1.2em;
+      text-decoration: none;
+    }
+
 
   </style>
 

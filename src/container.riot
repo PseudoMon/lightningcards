@@ -8,7 +8,9 @@
 
     <headnav
       title="Lightning Cards"
-      session={ props.deck.currentSession }>
+      session={ props.deck.currentSession }
+      on-open-screen={ (screen) => openScreen(screen) }
+    >
     </headnav>
 
     <main-menu
@@ -87,6 +89,11 @@
     startNewSession() {
       this.props.deck.startNewSession()
 
+      // Give warning window whenever user try to leave
+      window.onbeforeunload = function() {
+          return true;
+      };
+
       this.update({
         outOfCards: false,
         cardBeingShown: this.props.deck.drawCard()
@@ -104,6 +111,15 @@
         })
       } else {
         // Put error notification
+      }
+    },
+
+    onUpdated(state, props) {
+      if (state.screen != 'playing') {
+        // Remove warning-before-leaving when not currently playing
+        window.onbeforeunload = function() {
+            return true;
+        };
       }
     },
   }
