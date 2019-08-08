@@ -102,6 +102,7 @@ class Deck {
       deck: this.cards.slice(0),
       correctCounter: 0,
       playedCounter: 0,
+      setting: 'default',
     }
     this.currentSession.totalCount = this.cards.length
   }
@@ -118,9 +119,10 @@ class Deck {
     this.currentSession.totalCount = allCards.length
   }
 
-  startNewSession() {
+  startNewSession(setting='default') {
     this.currentSession.correctCounter = 0
     this.currentSession.playedCounter = 0
+    this.currentSession.setting = setting
     this.shuffleAllCards()
   }
 
@@ -173,6 +175,19 @@ class Deck {
 
     this.replaceDeck(importedDeck)
   }
+
+  getDecksDataFromLocalStorage() {
+    // This function retrieve all saved deck data
+    // and return them without processing
+    const decksData = localStorage.getItem("alldecks")
+
+    // If there's no data stored, return
+    if (!decksToImport) { return }
+
+    return decksData
+  }
+
+
 }
 
 const currentDeck = new Deck(sampleCards)

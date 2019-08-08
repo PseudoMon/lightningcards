@@ -1,5 +1,6 @@
 const Container = require('./container.riot').default
 const HeadNav = require('./headnav.riot').default
+const FooterNav = require('./footernav.riot').default
 const ImportExporter = require('./importexporter.riot').default
 const CardEdit = require('./cardedit.riot').default
 const PlayingContainer = require('./playing/playing-container.riot').default
@@ -17,6 +18,7 @@ const deck = require('./store.js')
 // Some components are registered in their parent components' file
 register('container', Container)
 register('headnav', HeadNav)
+register('footernav', FooterNav)
 register('import-exporter', ImportExporter)
 register('card-edit', CardEdit)
 register('playing-container', PlayingContainer)

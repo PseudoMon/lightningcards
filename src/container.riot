@@ -16,6 +16,7 @@
     <main-menu
       show={ state.currentScreen === 'main menu' ? true : false }
       current-deck-title={ props.deck.name }
+      on-change-setting = { (s) => changeSessionSetting(s)}
       on-start-practice={ () => openScreen('playing') }
       on-see-deck={ () => openScreen('deck view') }
     ></main-menu>
@@ -40,6 +41,7 @@
     ></playing-container>
 
 
+
   </div>
 
   <style>
@@ -62,7 +64,12 @@
         cardBeingShown: firstcard,
         outOfCards: false,
         notificationMessage: '',
+        sessionSetting: 'default',
       }
+
+      this.possibleScreens = [
+        'deck view', 'main menu', 'playing', 'setting'
+      ]
     },
 
     updateDeck() {
@@ -87,7 +94,7 @@
     },
 
     startNewSession() {
-      this.props.deck.startNewSession()
+      this.props.deck.startNewSession(this.state.sessionSetting)
 
       // Give warning window whenever user try to leave
       window.onbeforeunload = function() {
@@ -100,28 +107,34 @@
       })
     },
 
+    changeSessionSetting(setting) {
+      this.update({
+        sessionSetting: setting
+      })
+    },
+
     openScreen (screen) {
       if (screen === 'playing') {
         this.startNewSession()
       }
+      else {
+        // Remove warning-before-leaving when not currently playing
+        window.onbeforeunload = function() {
+            return;
+        };
+      }
 
-      if (screen === 'deck view' || screen === 'main menu' || screen === 'playing') {
+      if (this.possibleScreens.includes(screen)) {
         this.update({
           currentScreen: screen
         })
       } else {
-        // Put error notification
+        this.update({
+          notificationMessage: "Error: No such screen as " + screen + ".",
+        })
       }
     },
 
-    onUpdated(state, props) {
-      if (state.screen != 'playing') {
-        // Remove warning-before-leaving when not currently playing
-        window.onbeforeunload = function() {
-            return true;
-        };
-      }
-    },
   }
   </script>
 

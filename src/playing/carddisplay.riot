@@ -1,13 +1,14 @@
 <card-display>
   <div class="card {state.cardClasses}">
     <div class="question">
-    { props.card.front }
+    { props.showingFront ? props.card.front : props.card.back }
     </div>
     <div if={!state.asking} class="answer">
-      {props.card.back }
+      { props.showingFront ? props.card.back : props.card.front }
     </div>
     <div if={!state.asking} class="synonym">
-      <span class="syn" each={syn in props.card.synBack}>{syn}</span>
+      <span if={ props.showingFront } class="syn" each={syn in props.card.synBack}>{syn}</span>
+      <span if={ props.showingFront === false } class="syn" each={syn in props.card.synFront}>{syn}</span>
     </div>
   </div>
 
@@ -110,14 +111,16 @@
         cardClasses: '',
         asking: true,
         correct: false,
+        // showingFront means the 'back' side is the part being asked
       }
     },
 
-    onUpdated() {
-      if (!this.state.asking) {
+    onUpdated(props, state) {
+      // Set focus
+      if (!state.asking) {
         this.$('#nextbutton').focus()
       }
-      else if (this.state.asking) {
+      else if (state.asking) {
         this.$('#answerinput').focus()
       }
     },
@@ -132,14 +135,27 @@
       e.preventDefault()
 
       let answer = String(this.state.answerBox).toLowerCase()
+
       if (!answer) {
         return
       }
 
-      let card = String(this.props.card.back).toLowerCase()
-      let synonyms = this.props.card.synBack.map((syn) => syn.toLowerCase())
+      let correctAnswer
+      let synonyms
 
-      if ( answer === card || synonyms.includes(answer) ) {
+      if (this.props.showingFront) {
+        correctAnswer = this.props.card.back
+        synonyms = this.props.card.synBack
+      }
+      else if (this.props.showingFront === false) {
+        correctAnswer = this.props.card.front
+        synonyms = this.props.card.synFront
+      }
+
+      correctAnswer = correctAnswer.toLowerCase()
+      synonyms = synonyms.map((syn) => syn.toLowerCase())
+
+      if ( answer === correctAnswer || synonyms.includes(answer) ) {
         this.answerCorrect()
       }
       else {

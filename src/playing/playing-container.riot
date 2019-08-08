@@ -8,6 +8,7 @@
     session={ props.session }
     load-next-card={ props.loadNextCard }
     update-deck={ props.updateDeck }
+    showing-front={ state.defaultPlay }
   >
   </card-display>
 
@@ -25,7 +26,17 @@
     on-edit-deck={ props.onEditDeck }
   ></end-screen>
 
-  <div>
+  </div>
+
+  <style>
+    .startscreen {
+      text-align: center;
+    }
+    .startscreen button {
+      display: block;
+    }
+
+  </style>
 
   <script>
     const CardDisplay = require('./carddisplay.riot').default
@@ -38,21 +49,19 @@
     onBeforeMount() {
       this.state = {
         editing: false,
+        defaultPlay: true,
+        // default play is showing front and asking for back
       }
     },
 
-    // onMounted() {
-    //   // Give warning window whenever user try to leave
-    //   window.onbeforeunload = function() {
-    //       return true;
-    //   };
-    // },
-    //
-    // onBeforeUnmount() {
-    //   window.onbeforeunload = function() {
-    //       return false;
-    //   };
-    // },
+    onBeforeUpdate(props, state) {
+      if (props.session.setting == 'default') {
+        this.state.defaultPlay = true
+      }
+      else if (props.session.setting == 'reverse') {
+        this.state.defaultPlay = false
+      }
+    },
 
     finishEditing() {
       this.update({

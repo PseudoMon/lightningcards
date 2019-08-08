@@ -1,5 +1,5 @@
 # Lightning Cards
-Lightning Cards is a frontend-only flash card web app made with [Riot v4](https://riot.js.org). Lightning Cards is built to be simple, easy to use, and playable on both+++++++++++++++++++++++++ desktop and mobile.
+Lightning Cards is a frontend-only flash card web app made with [Riot v4](https://riot.js.org). Lightning Cards is built to be simple, easy to use, and playable on both desktop and mobile.
 
 This app is partly inspired by [Anki](https://apps.ankiweb.net/), a pretty good flash card app, but one that I just can't bring myself to use because of its complicated interface, especially when creating new cards. It's also inspired by [Wanikani](https://apps.ankiweb.net/), [Torii SRS](https://apps.ankiweb.net/), and [Duolingo](https://duolingo.com).
 
@@ -10,15 +10,15 @@ At the moment, the app is usable with basic functionalities built in. It saves y
 # The Big To-Do List:
 - Routing
 - Archive cards
-- Save deck to cache/cookie
 - Confirmation for importing cards
 - Error notification
 - Add Less preprocessing (for easier recoloring, etc)
 - Spaced repetition system
 - More keyboard shortcuts
-- Showing back first and asking for front
+- Saving and loading multiple decks locally (!)
+- Looks and play nice on mobile (!)
 
 # Running the thing
-I've set up `npm start` to get Browserify to watch the source files and automatically build everything into `bundle.js`.
+This Github project uses GitHub Pages, so you can just try out the latest pushed build by going to [https://pseudomon.github.io/lightningcards].
 
-This Github project uses GitHub Pages, so you can just try out the latest pushed build by going to [https://pseudomon.github.io/lightningcards].  
+If you want to play with the source, I've set up `npm start` to get Browserify to watch the source files and automatically build everything into `bundle.js`.
