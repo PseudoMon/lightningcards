@@ -30,11 +30,18 @@
   <style>
     .card {
       text-align: center;
-      font-size: 5rem;
+      font-size: 3rem;
       width: 80%;
       margin: 1.5rem auto;
       height: 400px;
+    }
 
+    /* Larger than tablet */
+    @media (min-width: 750px) {
+      .card {
+        font-size: 5rem;
+        height: 400px;
+      }
     }
 
     .half {

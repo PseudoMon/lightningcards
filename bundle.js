@@ -2370,7 +2370,7 @@ const {
 
 register('half-card', HalfCard);
 var _default = {
-  'css': `card-edit .card,[is="card-edit"] .card{ text-align: center; font-size: 5rem; width: 80%; margin: 1.5rem auto; height: 400px; } card-edit .half,[is="card-edit"] .half{ position: relative; padding: 0 2rem; box-sizing: border-box; border-radius: 5px; box-shadow: 2px 2px #8f8989; margin: 1rem; display: flex; flex-direction: column; justify-content: center; height: 50%; } card-edit .half.top,[is="card-edit"] .half.top{ background-color: #eeeeee; } card-edit .half.bottom,[is="card-edit"] .half.bottom{ background-color: #bdccff; } card-edit .buttons,[is="card-edit"] .buttons{ width: 80%; margin: 3rem auto; padding: 0 0.5rem; text-align: center; }`,
+  'css': `card-edit .card,[is="card-edit"] .card{ text-align: center; font-size: 3rem; width: 80%; margin: 1.5rem auto; height: 400px; } @media (min-width: 750px) { card-edit .card,[is="card-edit"] .card{ font-size: 5rem; height: 400px; } } card-edit .half,[is="card-edit"] .half{ position: relative; padding: 0 2rem; box-sizing: border-box; border-radius: 5px; box-shadow: 2px 2px #8f8989; margin: 1rem; display: flex; flex-direction: column; justify-content: center; height: 50%; } card-edit .half.top,[is="card-edit"] .half.top{ background-color: #eeeeee; } card-edit .half.bottom,[is="card-edit"] .half.bottom{ background-color: #bdccff; } card-edit .buttons,[is="card-edit"] .buttons{ width: 80%; margin: 3rem auto; padding: 0 0.5rem; text-align: center; }`,
   'exports': {
     onBeforeMount() {
       this.state = {
@@ -2414,7 +2414,7 @@ var _default = {
 
   },
   'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<div class="card editing"><div class="half top"><half-card expr21 front-or-back="front"></half-card></div><div class="half bottom"><half-card expr22 front-or-back="back"></half-card></div></div><div expr23 class="buttons"><button>Save card</button></div>', [{
+    return template('<div class="card editing"><div class="half top"><half-card expr485 front-or-back="front"></half-card></div><div class="half bottom"><half-card expr486 front-or-back="back"></half-card></div></div><div expr487 class="buttons"><button>Save card</button></div>', [{
       'type': bindingTypes.TAG,
       'getComponent': getComponent,
       'evaluate': function (scope) {
@@ -2458,8 +2458,8 @@ var _default = {
           return newSyn => scope.addSyn('front', newSyn);
         }
       }],
-      'redundantAttribute': 'expr21',
-      'selector': '[expr21]'
+      'redundantAttribute': 'expr485',
+      'selector': '[expr485]'
     }, {
       'type': bindingTypes.TAG,
       'getComponent': getComponent,
@@ -2504,11 +2504,11 @@ var _default = {
           return newSyn => scope.addSyn('back', newSyn);
         }
       }],
-      'redundantAttribute': 'expr22',
-      'selector': '[expr22]'
+      'redundantAttribute': 'expr486',
+      'selector': '[expr486]'
     }, {
-      'redundantAttribute': 'expr23',
-      'selector': '[expr23]',
+      'redundantAttribute': 'expr487',
+      'selector': '[expr487]',
       'expressions': [{
         'type': expressionTypes.EVENT,
         'name': 'onclick',
@@ -3222,7 +3222,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 var _default = {
-  'css': `half-card .label,[is="half-card"] .label{ position: absolute; left: 0.5em; top: 0.25em; text-transform: capitalize; font-size: 3rem; opacity: 0.5; } half-card .synonyms,[is="half-card"] .synonyms{ font-size: 0.5em; } half-card .synonyms button,[is="half-card"] .synonyms button{ border: none; } half-card .syn,[is="half-card"] .syn{ padding: 0.1em 0.2em; } half-card .syn .xbutton,[is="half-card"] .syn .xbutton{ color: grey; cursor: pointer; } half-card .syn .xbutton:hover,[is="half-card"] .syn .xbutton:hover{ color: #FF6860; } half-card .syn::after,[is="half-card"] .syn::after{ content: ", "; } half-card .syn:last-of-type::after,[is="half-card"] .syn:last-of-type::after{ content: ""; } half-card .maintext form,[is="half-card"] .maintext form{ margin-bottom: 0; } half-card .maintext input,[is="half-card"] .maintext input,half-card .synonyms input,[is="half-card"] .synonyms input{ background-color: transparent; border-top: none; border-left: none; border-right: none; border-color: #5b5b5b; } half-card .maintext input,[is="half-card"] .maintext input{ text-align: center; height: 1.2em; } half-card .maintext input:focus,[is="half-card"] .maintext input:focus,half-card .synonyms input:focus,[is="half-card"] .synonyms input:focus{ border-top: none; border-left: none; border-right: none; } half-card .synonyms input,[is="half-card"] .synonyms input{ font-size: 0.7em; } half-card .synonyms form,[is="half-card"] .synonyms form{ display: inline; }`,
+  'css': `half-card .label,[is="half-card"] .label{ position: absolute; left: 0.5em; top: 0.25em; text-transform: capitalize; font-size: 2.5rem; opacity: 0.5; } @media (min-width: 750px) { half-card .label,[is="half-card"] .label{ font-size: 2.5rem; } } half-card .synonyms,[is="half-card"] .synonyms{ font-size: 0.5em; } half-card .synonyms button,[is="half-card"] .synonyms button{ border: none; } half-card .syn,[is="half-card"] .syn{ padding: 0.1em 0.2em; } half-card .syn .xbutton,[is="half-card"] .syn .xbutton{ color: grey; cursor: pointer; } half-card .syn .xbutton:hover,[is="half-card"] .syn .xbutton:hover{ color: #FF6860; } half-card .syn::after,[is="half-card"] .syn::after{ content: ", "; } half-card .syn:last-of-type::after,[is="half-card"] .syn:last-of-type::after{ content: ""; } half-card .maintext form,[is="half-card"] .maintext form{ margin-bottom: 0; } half-card .maintext input,[is="half-card"] .maintext input,half-card .synonyms input,[is="half-card"] .synonyms input{ background-color: transparent; border-top: none; border-left: none; border-right: none; border-color: #5b5b5b; } half-card .maintext input,[is="half-card"] .maintext input{ text-align: center; height: 1.2em; max-width: 100%; } half-card .maintext input:focus,[is="half-card"] .maintext input:focus,half-card .synonyms input:focus,[is="half-card"] .synonyms input:focus{ border-top: none; border-left: none; border-right: none; } half-card .synonyms input,[is="half-card"] .synonyms input{ font-size: 0.7em; } half-card .synonyms form,[is="half-card"] .synonyms form{ display: inline; }`,
   'exports': {
     onBeforeMount() {
       this.state = {
@@ -3283,9 +3283,9 @@ var _default = {
 
   },
   'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<div expr32 class="label"><!----></div><div class="maintext"><span expr33></span><form expr34></form></div><div class="synonyms"><span expr36 class="syn"></span><form expr38></form><button expr40></button></div>', [{
-      'redundantAttribute': 'expr32',
-      'selector': '[expr32]',
+    return template('<div expr473 class="label"><!----></div><div class="maintext"><span expr474></span><form expr475></form></div><div class="synonyms"><span expr477 class="syn"></span><form expr479></form><button expr481></button></div>', [{
+      'redundantAttribute': 'expr473',
+      'selector': '[expr473]',
       'expressions': [{
         'type': expressionTypes.TEXT,
         'childNodeIndex': 0,
@@ -3298,8 +3298,8 @@ var _default = {
       'evaluate': function (scope) {
         return !scope.state.editing;
       },
-      'redundantAttribute': 'expr33',
-      'selector': '[expr33]',
+      'redundantAttribute': 'expr474',
+      'selector': '[expr474]',
       'template': template('<!---->', [{
         'expressions': [{
           'type': expressionTypes.TEXT,
@@ -3320,9 +3320,9 @@ var _default = {
       'evaluate': function (scope) {
         return scope.state.editing;
       },
-      'redundantAttribute': 'expr34',
-      'selector': '[expr34]',
-      'template': template('<input expr35 id="mainfield" type="text" autocomplete="off"/>', [{
+      'redundantAttribute': 'expr475',
+      'selector': '[expr475]',
+      'template': template('<input expr476 id="mainfield" type="text" autocomplete="off"/>', [{
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onsubmit',
@@ -3331,8 +3331,8 @@ var _default = {
           }
         }]
       }, {
-        'redundantAttribute': 'expr35',
-        'selector': '[expr35]',
+        'redundantAttribute': 'expr476',
+        'selector': '[expr476]',
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'oninput',
@@ -3350,7 +3350,7 @@ var _default = {
       'type': bindingTypes.EACH,
       'getKey': null,
       'condition': null,
-      'template': template('<!----><span expr37 class="xbutton">x</span>', [{
+      'template': template('<!----><span expr478 class="xbutton">x</span>', [{
         'expressions': [{
           'type': expressionTypes.TEXT,
           'childNodeIndex': 0,
@@ -3359,8 +3359,8 @@ var _default = {
           }
         }]
       }, {
-        'redundantAttribute': 'expr37',
-        'selector': '[expr37]',
+        'redundantAttribute': 'expr478',
+        'selector': '[expr478]',
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onclick',
@@ -3369,8 +3369,8 @@ var _default = {
           }
         }]
       }]),
-      'redundantAttribute': 'expr36',
-      'selector': '[expr36]',
+      'redundantAttribute': 'expr477',
+      'selector': '[expr477]',
       'itemName': 'syn',
       'indexName': 'i',
       'evaluate': function (scope) {
@@ -3381,9 +3381,9 @@ var _default = {
       'evaluate': function (scope) {
         return scope.state.addingSyn;
       },
-      'redundantAttribute': 'expr38',
-      'selector': '[expr38]',
-      'template': template('<input expr39 id="synfield" type="text" autocomplete="off"/><button type="submit">Submit</button>', [{
+      'redundantAttribute': 'expr479',
+      'selector': '[expr479]',
+      'template': template('<input expr480 id="synfield" type="text" autocomplete="off"/><button type="submit">Submit</button>', [{
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onsubmit',
@@ -3392,8 +3392,8 @@ var _default = {
           }
         }]
       }, {
-        'redundantAttribute': 'expr39',
-        'selector': '[expr39]',
+        'redundantAttribute': 'expr480',
+        'selector': '[expr480]',
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'oninput',
@@ -3412,8 +3412,8 @@ var _default = {
       'evaluate': function (scope) {
         return !scope.state.addingSyn;
       },
-      'redundantAttribute': 'expr40',
-      'selector': '[expr40]',
+      'redundantAttribute': 'expr481',
+      'selector': '[expr481]',
       'template': template('Add synonym', [{
         'expressions': [{
           'type': expressionTypes.EVENT,
@@ -3436,12 +3436,12 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 var _default = {
-  'css': `headnav,[is="headnav"]{ width: 100%; display: flex; justify-content: space-between; height: 60px; margin-bottom: 20px; } headnav .title,[is="headnav"] .title{ font-weight: 500; } headnav h1,[is="headnav"] h1{line-height: 60px; } headnav div,[is="headnav"] div{line-height: 60px; } headnav .navlinks a,[is="headnav"] .navlinks a{ margin: 0 1.2em; text-decoration: none; }`,
+  'css': `headnav,[is="headnav"]{ width: 100%; display: flex; justify-content: space-between; height: 60px; margin-bottom: 20px; } headnav .title,[is="headnav"] .title{ font-weight: 500; } headnav h1,[is="headnav"] h1{line-height: 60px; } headnav div,[is="headnav"] div{line-height: 60px; } headnav .navlinks,[is="headnav"] .navlinks{ display: none; } @media (min-width: 750px) { headnav .navlinks,[is="headnav"] .navlinks{ display: block; } } headnav .navlinks a,[is="headnav"] .navlinks a{ margin: 0 1.2em; text-decoration: none; }`,
   'exports': null,
   'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<div expr65 class="title"><!----></div><div class="navlinks"><a expr66 href="#mainmenu">Main Menu</a><a expr67 href="#deckview">View Deck</a><a expr68 href="#playing">Start Practice</a></div><div class="sessioncounter"><span expr69 class="correct"><!----></span>/<span expr70 class="wrong"><!----></span>/<span expr71 class="total"><!----></span></div>', [{
-      'redundantAttribute': 'expr65',
-      'selector': '[expr65]',
+    return template('<div expr332 class="title"><!----></div><div class="navlinks"><a expr333 href="#mainmenu">Main Menu</a><a expr334 href="#deckview">View Deck</a><a expr335 href="#playing">Start Practice</a></div><div class="sessioncounter"><span expr336 class="correct"><!----></span>/<span expr337 class="wrong"><!----></span>/<span expr338 class="total"><!----></span></div>', [{
+      'redundantAttribute': 'expr332',
+      'selector': '[expr332]',
       'expressions': [{
         'type': expressionTypes.TEXT,
         'childNodeIndex': 0,
@@ -3450,8 +3450,8 @@ var _default = {
         }
       }]
     }, {
-      'redundantAttribute': 'expr66',
-      'selector': '[expr66]',
+      'redundantAttribute': 'expr333',
+      'selector': '[expr333]',
       'expressions': [{
         'type': expressionTypes.EVENT,
         'name': 'onclick',
@@ -3460,8 +3460,8 @@ var _default = {
         }
       }]
     }, {
-      'redundantAttribute': 'expr67',
-      'selector': '[expr67]',
+      'redundantAttribute': 'expr334',
+      'selector': '[expr334]',
       'expressions': [{
         'type': expressionTypes.EVENT,
         'name': 'onclick',
@@ -3470,8 +3470,8 @@ var _default = {
         }
       }]
     }, {
-      'redundantAttribute': 'expr68',
-      'selector': '[expr68]',
+      'redundantAttribute': 'expr335',
+      'selector': '[expr335]',
       'expressions': [{
         'type': expressionTypes.EVENT,
         'name': 'onclick',
@@ -3480,8 +3480,8 @@ var _default = {
         }
       }]
     }, {
-      'redundantAttribute': 'expr69',
-      'selector': '[expr69]',
+      'redundantAttribute': 'expr336',
+      'selector': '[expr336]',
       'expressions': [{
         'type': expressionTypes.TEXT,
         'childNodeIndex': 0,
@@ -3490,8 +3490,8 @@ var _default = {
         }
       }]
     }, {
-      'redundantAttribute': 'expr70',
-      'selector': '[expr70]',
+      'redundantAttribute': 'expr337',
+      'selector': '[expr337]',
       'expressions': [{
         'type': expressionTypes.TEXT,
         'childNodeIndex': 0,
@@ -3500,8 +3500,8 @@ var _default = {
         }
       }]
     }, {
-      'redundantAttribute': 'expr71',
-      'selector': '[expr71]',
+      'redundantAttribute': 'expr338',
+      'selector': '[expr338]',
       'expressions': [{
         'type': expressionTypes.TEXT,
         'childNodeIndex': 0,
@@ -3641,16 +3641,16 @@ var _default = {
 
   },
   'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<div expr320></div>', [{
+    return template('<div expr339></div>', [{
       'type': bindingTypes.IF,
       'evaluate': function (scope) {
         return scope.props.show;
       },
-      'redundantAttribute': 'expr320',
-      'selector': '[expr320]',
-      'template': template('<h3>Welcome to Lightning Cards</h3><div><p>Your currently loaded deck is\r\n        <span expr321 class="decktitle"><!----></span></p><p>Your current practice setting is\r\n      <select expr322 class="setting"><option value="default">Default (shows front, asks for back)</option><option value="reverse">Reverse (shows back, asks for front)</option></select></p></div><div><button expr323>Start Practice</button><button expr324>See/Edit Deck</button></div>', [{
-        'redundantAttribute': 'expr321',
-        'selector': '[expr321]',
+      'redundantAttribute': 'expr339',
+      'selector': '[expr339]',
+      'template': template('<h3>Welcome to Lightning Cards</h3><div><p>Your currently loaded deck is\r\n        <span expr340 class="decktitle"><!----></span></p><p>Your current practice setting is\r\n      <select expr341 class="setting"><option value="default">Default (Front->Back)</option><option value="reverse">Reverse (Back->Front)</option></select></p></div><div><button expr342>Start Practice</button><button expr343>See/Edit Deck</button></div>', [{
+        'redundantAttribute': 'expr340',
+        'selector': '[expr340]',
         'expressions': [{
           'type': expressionTypes.TEXT,
           'childNodeIndex': 0,
@@ -3659,8 +3659,8 @@ var _default = {
           }
         }]
       }, {
-        'redundantAttribute': 'expr322',
-        'selector': '[expr322]',
+        'redundantAttribute': 'expr341',
+        'selector': '[expr341]',
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onchange',
@@ -3669,8 +3669,8 @@ var _default = {
           }
         }]
       }, {
-        'redundantAttribute': 'expr323',
-        'selector': '[expr323]',
+        'redundantAttribute': 'expr342',
+        'selector': '[expr342]',
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onclick',
@@ -3679,8 +3679,8 @@ var _default = {
           }
         }]
       }, {
-        'redundantAttribute': 'expr324',
-        'selector': '[expr324]',
+        'redundantAttribute': 'expr343',
+        'selector': '[expr343]',
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onclick',
@@ -3702,7 +3702,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 var _default = {
-  'css': `card-display .card,[is="card-display"] .card{ text-align: center; font-size: 5rem; width: 80%; margin: 2.5rem auto; padding: 0 2rem; border-radius: 5px; background-color: #eeeeee; box-shadow: 5px 5px #8f8989; height: 300px; display: flex; flex-direction: column; justify-content: center; } card-display .card.correct,[is="card-display"] .card.correct{ background-color: #bcf15b; color: #231717; } card-display .card.wrong,[is="card-display"] .card.wrong{ background-color: #FF6860; color: #563737; } card-display .card.wrong .answer,[is="card-display"] .card.wrong .answer{ color: #fff; } card-display .answered .question,[is="card-display"] .answered .question{ font-size: 0.8em; opacity: 0.5; } card-display .answered .synonym,[is="card-display"] .answered .synonym{ font-size: 0.5em; } card-display .syn,[is="card-display"] .syn{ padding: 0.1em 0.2em; } card-display .syn::after,[is="card-display"] .syn::after{ content: ", "; } card-display .syn:last-of-type::after,[is="card-display"] .syn:last-of-type::after{ content: ""; } card-display .card-answer,[is="card-display"] .card-answer{ width: 80%; margin: 1rem auto; padding: 0 0.5rem; text-align: center; } card-display .card-answer.answered button,[is="card-display"] .card-answer.answered button{ margin: 0 2em; } card-display .card-answer input,[is="card-display"] .card-answer input{ width: 80%; text-align: center; } card-display .card-answer.asking .button-primary,[is="card-display"] .card-answer.asking .button-primary{ width: 60%; }`,
+  'css': `card-display .card,[is="card-display"] .card{ text-align: center; font-size: 3rem; width: 80%; margin: 2.5rem auto; padding: 0.5rem 2rem; border-radius: 5px; background-color: #eeeeee; box-shadow: 5px 5px #8f8989; height: 120px; display: flex; flex-direction: column; justify-content: center; } @media (min-width: 750px) { card-display .card,[is="card-display"] .card{ height: 300px; font-size: 5rem; } } card-display .card.correct,[is="card-display"] .card.correct{ background-color: #bcf15b; color: #231717; } card-display .card.wrong,[is="card-display"] .card.wrong{ background-color: #FF6860; color: #563737; } card-display .card.wrong .answer,[is="card-display"] .card.wrong .answer{ color: #fff; } card-display .answered .question,[is="card-display"] .answered .question{ font-size: 0.8em; opacity: 0.5; } card-display .answered .synonym,[is="card-display"] .answered .synonym{ font-size: 0.5em; } card-display .syn,[is="card-display"] .syn{ padding: 0.1em 0.2em; } card-display .syn::after,[is="card-display"] .syn::after{ content: ", "; } card-display .syn:last-of-type::after,[is="card-display"] .syn:last-of-type::after{ content: ""; } card-display .card-answer,[is="card-display"] .card-answer{ width: 80%; margin: 1rem auto; padding: 0 0.5rem; text-align: center; } card-display .card-answer.answered button,[is="card-display"] .card-answer.answered button{ margin: 1em 2em; } card-display .card-answer input,[is="card-display"] .card-answer input{ width: 80%; text-align: center; } card-display .card-answer.asking .button-primary,[is="card-display"] .card-answer.asking .button-primary{ width: 60%; }`,
   'exports': {
     onBeforeMount() {
       this.state = {
@@ -3797,9 +3797,9 @@ var _default = {
 
   },
   'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<div expr121><div expr122 class="question"><!----></div><div expr123 class="answer"></div><div expr124 class="synonym"></div></div><div expr127 class="card-answer asking"></div><div expr130 class="card-answer answered"></div>', [{
-      'redundantAttribute': 'expr121',
-      'selector': '[expr121]',
+    return template('<div expr428><div expr429 class="question"><!----></div><div expr430 class="answer"></div><div expr431 class="synonym"></div></div><div expr434 class="card-answer asking"></div><div expr437 class="card-answer answered"></div>', [{
+      'redundantAttribute': 'expr428',
+      'selector': '[expr428]',
       'expressions': [{
         'type': expressionTypes.ATTRIBUTE,
         'name': 'class',
@@ -3808,8 +3808,8 @@ var _default = {
         }
       }]
     }, {
-      'redundantAttribute': 'expr122',
-      'selector': '[expr122]',
+      'redundantAttribute': 'expr429',
+      'selector': '[expr429]',
       'expressions': [{
         'type': expressionTypes.TEXT,
         'childNodeIndex': 0,
@@ -3822,8 +3822,8 @@ var _default = {
       'evaluate': function (scope) {
         return !scope.state.asking;
       },
-      'redundantAttribute': 'expr123',
-      'selector': '[expr123]',
+      'redundantAttribute': 'expr430',
+      'selector': '[expr430]',
       'template': template('<!---->', [{
         'expressions': [{
           'type': expressionTypes.TEXT,
@@ -3838,9 +3838,9 @@ var _default = {
       'evaluate': function (scope) {
         return !scope.state.asking;
       },
-      'redundantAttribute': 'expr124',
-      'selector': '[expr124]',
-      'template': template('<span expr125 class="syn"></span><span expr126 class="syn"></span>', [{
+      'redundantAttribute': 'expr431',
+      'selector': '[expr431]',
+      'template': template('<span expr432 class="syn"></span><span expr433 class="syn"></span>', [{
         'type': bindingTypes.EACH,
         'getKey': null,
         'condition': function (scope) {
@@ -3855,8 +3855,8 @@ var _default = {
             }
           }]
         }]),
-        'redundantAttribute': 'expr125',
-        'selector': '[expr125]',
+        'redundantAttribute': 'expr432',
+        'selector': '[expr432]',
         'itemName': 'syn',
         'indexName': null,
         'evaluate': function (scope) {
@@ -3877,8 +3877,8 @@ var _default = {
             }
           }]
         }]),
-        'redundantAttribute': 'expr126',
-        'selector': '[expr126]',
+        'redundantAttribute': 'expr433',
+        'selector': '[expr433]',
         'itemName': 'syn',
         'indexName': null,
         'evaluate': function (scope) {
@@ -3890,11 +3890,11 @@ var _default = {
       'evaluate': function (scope) {
         return scope.state.asking;
       },
-      'redundantAttribute': 'expr127',
-      'selector': '[expr127]',
-      'template': template('<form><input expr128 id="answerinput" type="text" autocomplete="off" placeholder="Answer"/><button expr129 class="button-primary">Enter</button></form>', [{
-        'redundantAttribute': 'expr128',
-        'selector': '[expr128]',
+      'redundantAttribute': 'expr434',
+      'selector': '[expr434]',
+      'template': template('<form><input expr435 id="answerinput" type="text" autocomplete="off" placeholder="Answer"/><button expr436 class="button-primary">Enter</button></form>', [{
+        'redundantAttribute': 'expr435',
+        'selector': '[expr435]',
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'oninput',
@@ -3903,8 +3903,8 @@ var _default = {
           }
         }]
       }, {
-        'redundantAttribute': 'expr129',
-        'selector': '[expr129]',
+        'redundantAttribute': 'expr436',
+        'selector': '[expr436]',
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onclick',
@@ -3918,11 +3918,11 @@ var _default = {
       'evaluate': function (scope) {
         return !scope.state.asking;
       },
-      'redundantAttribute': 'expr130',
-      'selector': '[expr130]',
-      'template': template('<button expr131 class="button">Edit card</button><button expr132 id="nextbutton" class="button-primary">Next</button>', [{
-        'redundantAttribute': 'expr131',
-        'selector': '[expr131]',
+      'redundantAttribute': 'expr437',
+      'selector': '[expr437]',
+      'template': template('<button expr438 class="button">Edit card</button><button expr439 id="nextbutton" class="button-primary">Next</button>', [{
+        'redundantAttribute': 'expr438',
+        'selector': '[expr438]',
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onclick',
@@ -3931,8 +3931,8 @@ var _default = {
           }
         }]
       }, {
-        'redundantAttribute': 'expr132',
-        'selector': '[expr132]',
+        'redundantAttribute': 'expr439',
+        'selector': '[expr439]',
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onclick',
