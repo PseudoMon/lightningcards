@@ -9,7 +9,8 @@
 
   <div class="import">
     <h3>Import Deck</h3>
-    <p>Paste card data here.</p>
+    <p>This will completely replace your current deck with the imported deck. If you want to keep your current deck, create a new deck in Manage Decks menu.</p>
+    <p>Paste card data below and click the button.</p>
     <div>
       <textarea oninput={ changeImportText }>{ state.deckToImport }</textarea>
     </div>
@@ -31,6 +32,10 @@
 
     textarea {
       min-width: 80%;
+    }
+
+    .import {
+      margin-top: 40px;
     }
   </style>
   <script>

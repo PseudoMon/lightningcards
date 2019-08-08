@@ -13,6 +13,10 @@
     >
     </headnav>
 
+    <about
+      show={ state.currentScreen === 'about' ? true : false }>
+    </about>
+
     <main-menu
       show={ state.currentScreen === 'main menu' ? true : false }
       current-deck-title={ props.deck.name }
@@ -40,6 +44,9 @@
       on-edit-deck={ () => openScreen('deck view') }
     ></playing-container>
 
+    <footernav
+      on-click-about={ () => openScreen('about') }
+    ></footernav>
 
 
   </div>
@@ -68,7 +75,7 @@
       }
 
       this.possibleScreens = [
-        'deck view', 'main menu', 'playing', 'setting'
+        'deck view', 'main menu', 'playing', 'setting', 'about'
       ]
     },
 

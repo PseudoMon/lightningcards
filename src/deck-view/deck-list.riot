@@ -1,0 +1,104 @@
+<deck-list>
+    <h2>Decks</h2>
+    <p>These decks are saved locally in your browser. Use the export feature to keep a backup or to import them to a different system.</p>
+    <p><button onclick={ addNewDeck }>New deck</button></p>
+
+    <div class="row deck" each={ (deck, i) in props.decksData }>
+      <div class="one-third column">
+        <div class="smalldeck">
+          <div class="innercard">
+            { deck.name }
+          </div>
+        </div>
+      </div>
+
+      <div class="two-thirds column deckcontrol">
+        <div>
+          <button onclick={ (e) => selectDeck(deck, i) }>
+            Use Deck
+          </button>
+          <button onclick={ (e) => removeDeck(i) }>
+            Remove Deck
+          </button>
+        </div>
+      </div>
+    </div>
+
+
+    <style>
+
+      .smalldeck {
+        background-color: #e8edff;
+        border-radius: 3px;
+        box-shadow: 1px 1px #8f8989;
+        width: 80%;
+        min-width: 160px;
+        min-height: 80px;
+        margin: 20px auto;
+        padding: 0.2em;
+        cursor: pointer;
+        text-align: center;
+        position: relative;
+      }
+
+      .smalldeck:hover {
+        box-shadow: 1px 1px #000;
+      }
+
+      .smalldeck .innercard {
+        position: absolute;
+        top: 8px;
+        left: 12px;
+        width: 100%;
+        height: 100%;
+        border-radius: 3px;
+        background-color: #bdccff;
+        box-shadow: 1px 1px #8f8989;
+        font-size: 2rem;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .smalldeck .innercard:hover {
+        background-color: #bcf15b;
+        color: #231717;
+      }
+
+      .deckcontrol {
+        text-align: center;
+      }
+
+      @media (min-width: 550px) {
+        .deckcontrol {
+          padding-top: 50px;
+          text-align: left;
+        }
+      }
+
+      .deckcontrol button {
+        margin: 0.5em;
+      }
+    </style>
+
+    <script>
+    export default {
+
+      selectDeck(deck, i) {
+        this.props.deck.removeFromLocalDecks(i)
+        this.props.onSelectDeck(deck)
+      },
+
+      removeDeck(i) {
+        this.props.deck.removeFromLocalDecks(i)
+        this.props.updateDeck()
+      },
+
+      addNewDeck() {
+        const emptyDeck = {name: "Unnamed Deck", cards: [{}]}
+        this.props.onSelectDeck(emptyDeck)
+      },
+    }
+    </script>
+</deck-list>

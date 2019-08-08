@@ -2,11 +2,21 @@
 
   <div if={ props.show }>
 
-  <card-list if={ !state.editingCard && !state.isImportExporting }
+  <deck-list
+    if={ state.isManagingDecks }
+    deck={ props.deck }
+    update-deck={ updateDeckList }
+    decks-data={ state.decksData }
+    on-select-deck={ (d) => finishManagingDecks(d) }
+  >
+  </deck-list>
+
+  <card-list if={ !state.editingCard && !state.isImportExporting && !state.isManagingDecks }
     deck={ props.deck }
     on-add-new-card={ addNewCard }
     update-deck={ props.updateDeck }
     on-open-import-exporter={ openImportExporter }
+    on-open-managing-decks={ openManagingDecks }
     on-click-card={ (i) => this.editCard(i) }
     on-back-to-menu={ props.onBackToMenu }
   >
@@ -31,9 +41,11 @@
 
 
   <script>
-    const CardList = require('./cardlist.riot').default
+    const CardList = require('./card-list.riot').default
+    const DeckList = require('./deck-list.riot').default
     const { register } = require('riot')
 
+    register('deck-list', DeckList)
     register('card-list', CardList)
 
   export default {
@@ -41,6 +53,8 @@
       this.state = {
         editingCard: false,
         isImportExporting: false,
+        isManagingDecks: false,
+        decksData: null,
       }
     },
 
@@ -74,7 +88,38 @@
       this.update({
         isImportExporting: false,
       })
-    }
+    },
+
+    openManagingDecks() {
+      // How this work is that
+      // we'll always save a copy of the current deck whenever
+      // we're switching deck. We'll destroy the copy of the
+      // chosen deck when we load it.
+      this.props.deck.saveCurrentDeckToLocalDecks()
+      const decksData = this.props.deck.getLocalDecks()
+
+      this.update({
+        isManagingDecks: true,
+        decksData: JSON.parse(decksData),
+      })
+    },
+
+    updateDeckList() {
+      const decksData = this.props.deck.getLocalDecks()
+
+      this.update({
+        decksData: JSON.parse(decksData),
+      })
+    },
+
+    finishManagingDecks(chosenDeck) {
+      this.props.deck.replaceDeck(chosenDeck)
+      this.props.updateDeck()
+
+      this.update({
+        isManagingDecks: false,
+      })
+    },
   }
 
   </script>

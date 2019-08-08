@@ -1,9 +1,9 @@
 <headnav>
-    <div class="title">{ props.title }</div>
+    <div onclick={() => props.onOpenScreen('main menu')} class="title">{ props.title }</div>
     <div class="navlinks">
-      <a onclick={() => props.onOpenScreen('main menu')} href="#mainmenu">Main Menu</a>
-      <a onclick={() => props.onOpenScreen('deck view')} href="#deckview">View Deck</a>
-      <a onclick={() => props.onOpenScreen('playing')} href="#playing">Start Practice</a>
+      <a onclick={() => props.onOpenScreen('main menu')} href="#">Main Menu</a>
+      <a onclick={() => props.onOpenScreen('deck view')} href="#">View Deck</a>
+      <a onclick={() => props.onOpenScreen('playing')} href="#">Start Practice</a>
     </div>
 
     <div class="sessioncounter">
@@ -25,7 +25,7 @@
       margin-bottom: 20px;
     }
 
-    .title { font-weight: 500; }
+    .title { font-weight: 500; cursor: pointer; }
 
     h1 {line-height: 60px; }
     div {line-height: 60px; }

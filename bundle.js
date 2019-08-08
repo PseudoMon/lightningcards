@@ -2324,6 +2324,30 @@
 }));
 
 },{}],2:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+var _default = {
+  'css': `about div,[is="about"] div{ max-width: 800px; margin: 0 auto;}`,
+  'exports': null,
+  'template': function (template, expressionTypes, bindingTypes, getComponent) {
+    return template('<div expr569></div>', [{
+      'type': bindingTypes.IF,
+      'evaluate': function (scope) {
+        return scope.props.show;
+      },
+      'redundantAttribute': 'expr569',
+      'selector': '[expr569]',
+      'template': template('<h3>About</h3><p>Lightning Cards is a simple flash card web app made by Aliya N. Anindita a.k.a <a href="https://pseudomon.github.io">PseudoMon</a> simply because she needs a flash card app but is mildly annoyed that Anki is so complicated.</p><p>This app is completely front-end, so you can probably just save the page and it\'ll work offline. It automatically saves your decks locally in your browser, but you can also use the import/exporter feature to create a backup or to move to a different system/browser.</p><p>I give absolutely no guarantee that this app will work all the time. But if you encounter something fishy, you can contact me and I\'ll give it a look.</p><p>Got comments? Suggestions? Questions? Just want to say hi? Want to tell the developer that she hasn\'t been wasting her time making this thing? You can contact me on <a href="https://twitter.com/PseudoStygian">Twitter</a> or through <a href="https://pseudomon.github.io/contact">this form</a>.</p><p>For more info about the app, see the <a href="https://github.com/PseudoMon/lightningcards">Repository</a>.\r\n  </p>', [])
+    }]);
+  },
+  'name': 'about'
+};
+exports.default = _default;
+},{}],3:[function(require,module,exports){
 const Container = require('./container.riot').default
 const HeadNav = require('./headnav.riot').default
 const FooterNav = require('./footernav.riot').default
@@ -2332,6 +2356,7 @@ const CardEdit = require('./cardedit.riot').default
 const PlayingContainer = require('./playing/playing-container.riot').default
 const DeckEditContainer = require('./deck-view/deckeditcontainer.riot').default
 const MainMenu = require('./main-menu.riot').default
+const About = require('./about.riot').default
 
 const { registerPreprocessor, register, mount } = require('riot')
 
@@ -2350,11 +2375,12 @@ register('card-edit', CardEdit)
 register('playing-container', PlayingContainer)
 register('deck-edit-container', DeckEditContainer)
 register('main-menu', MainMenu)
+register('about', About)
 
 // Mounting the main app
 mount('container', {deck: deck})
 
-},{"./cardedit.riot":3,"./container.riot":4,"./deck-view/deckeditcontainer.riot":6,"./footernav.riot":7,"./headnav.riot":9,"./importexporter.riot":10,"./main-menu.riot":11,"./playing/playing-container.riot":14,"./store.js":15,"riot":1}],3:[function(require,module,exports){
+},{"./about.riot":2,"./cardedit.riot":4,"./container.riot":5,"./deck-view/deckeditcontainer.riot":8,"./footernav.riot":9,"./headnav.riot":11,"./importexporter.riot":12,"./main-menu.riot":13,"./playing/playing-container.riot":16,"./store.js":17,"riot":1}],4:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2414,7 +2440,7 @@ var _default = {
 
   },
   'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<div class="card editing"><div class="half top"><half-card expr485 front-or-back="front"></half-card></div><div class="half bottom"><half-card expr486 front-or-back="back"></half-card></div></div><div expr487 class="buttons"><button>Save card</button></div>', [{
+    return template('<div class="card editing"><div class="half top"><half-card expr22 front-or-back="front"></half-card></div><div class="half bottom"><half-card expr23 front-or-back="back"></half-card></div></div><div expr24 class="buttons"><button>Save card</button></div>', [{
       'type': bindingTypes.TAG,
       'getComponent': getComponent,
       'evaluate': function (scope) {
@@ -2458,8 +2484,8 @@ var _default = {
           return newSyn => scope.addSyn('front', newSyn);
         }
       }],
-      'redundantAttribute': 'expr485',
-      'selector': '[expr485]'
+      'redundantAttribute': 'expr22',
+      'selector': '[expr22]'
     }, {
       'type': bindingTypes.TAG,
       'getComponent': getComponent,
@@ -2504,11 +2530,11 @@ var _default = {
           return newSyn => scope.addSyn('back', newSyn);
         }
       }],
-      'redundantAttribute': 'expr486',
-      'selector': '[expr486]'
+      'redundantAttribute': 'expr23',
+      'selector': '[expr23]'
     }, {
-      'redundantAttribute': 'expr487',
-      'selector': '[expr487]',
+      'redundantAttribute': 'expr24',
+      'selector': '[expr24]',
       'expressions': [{
         'type': expressionTypes.EVENT,
         'name': 'onclick',
@@ -2521,7 +2547,7 @@ var _default = {
   'name': 'card-edit'
 };
 exports.default = _default;
-},{"./halfcardedit.riot":8,"riot":1}],4:[function(require,module,exports){
+},{"./halfcardedit.riot":10,"riot":1}],5:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2542,7 +2568,7 @@ var _default = {
         notificationMessage: '',
         sessionSetting: 'default'
       };
-      this.possibleScreens = ['deck view', 'main menu', 'playing', 'setting'];
+      this.possibleScreens = ['deck view', 'main menu', 'playing', 'setting', 'about'];
     },
 
     updateDeck() {
@@ -2606,7 +2632,7 @@ var _default = {
 
   },
   'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<div><notification expr311></notification><headnav expr312 title="Lightning Cards"></headnav><main-menu expr313></main-menu><deck-edit-container expr314></deck-edit-container><playing-container expr315></playing-container></div>', [{
+    return template('<div><notification expr561></notification><headnav expr562 title="Lightning Cards"></headnav><about expr563></about><main-menu expr564></main-menu><deck-edit-container expr565></deck-edit-container><playing-container expr566></playing-container><footernav expr567></footernav></div>', [{
       'type': bindingTypes.TAG,
       'getComponent': getComponent,
       'evaluate': function (scope) {
@@ -2626,8 +2652,8 @@ var _default = {
         }]
       }],
       'attributes': [],
-      'redundantAttribute': 'expr311',
-      'selector': '[expr311]'
+      'redundantAttribute': 'expr561',
+      'selector': '[expr561]'
     }, {
       'type': bindingTypes.TAG,
       'getComponent': getComponent,
@@ -2654,8 +2680,24 @@ var _default = {
           return screen => scope.openScreen(screen);
         }
       }],
-      'redundantAttribute': 'expr312',
-      'selector': '[expr312]'
+      'redundantAttribute': 'expr562',
+      'selector': '[expr562]'
+    }, {
+      'type': bindingTypes.TAG,
+      'getComponent': getComponent,
+      'evaluate': function (scope) {
+        return 'about';
+      },
+      'slots': [],
+      'attributes': [{
+        'type': expressionTypes.ATTRIBUTE,
+        'name': 'show',
+        'evaluate': function (scope) {
+          return scope.state.currentScreen === 'about' ? true : false;
+        }
+      }],
+      'redundantAttribute': 'expr563',
+      'selector': '[expr563]'
     }, {
       'type': bindingTypes.TAG,
       'getComponent': getComponent,
@@ -2694,8 +2736,8 @@ var _default = {
           return () => scope.openScreen('deck view');
         }
       }],
-      'redundantAttribute': 'expr313',
-      'selector': '[expr313]'
+      'redundantAttribute': 'expr564',
+      'selector': '[expr564]'
     }, {
       'type': bindingTypes.TAG,
       'getComponent': getComponent,
@@ -2728,8 +2770,8 @@ var _default = {
           return () => scope.openScreen('main menu');
         }
       }],
-      'redundantAttribute': 'expr314',
-      'selector': '[expr314]'
+      'redundantAttribute': 'expr565',
+      'selector': '[expr565]'
     }, {
       'type': bindingTypes.TAG,
       'getComponent': getComponent,
@@ -2786,14 +2828,30 @@ var _default = {
           return () => scope.openScreen('deck view');
         }
       }],
-      'redundantAttribute': 'expr315',
-      'selector': '[expr315]'
+      'redundantAttribute': 'expr566',
+      'selector': '[expr566]'
+    }, {
+      'type': bindingTypes.TAG,
+      'getComponent': getComponent,
+      'evaluate': function (scope) {
+        return 'footernav';
+      },
+      'slots': [],
+      'attributes': [{
+        'type': expressionTypes.EVENT,
+        'name': 'on-click-about',
+        'evaluate': function (scope) {
+          return () => scope.openScreen('about');
+        }
+      }],
+      'redundantAttribute': 'expr567',
+      'selector': '[expr567]'
     }]);
   },
   'name': 'container'
 };
 exports.default = _default;
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2850,13 +2908,13 @@ var _default = {
 
   },
   'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<h2 class="deckname"><span expr222></span><form expr223></form></h2><div class="header"><button expr225>Edit Deck Name</button><button expr226>Add New Card</button><button expr227>Import/Export Deck</button></div><div class="cardlist"><div expr228 class="smallcard"></div></div>', [{
+    return template('<h2 class="deckname"><span expr162></span><form expr163></form></h2><div class="header"><button expr165>Edit Deck Name</button><button expr166>Add New Card</button><button expr167>Import/Export Deck</button><button expr168>Manage Decks</button></div><div class="cardlist"><div expr169 class="smallcard"></div></div>', [{
       'type': bindingTypes.IF,
       'evaluate': function (scope) {
         return !scope.state.editingName;
       },
-      'redundantAttribute': 'expr222',
-      'selector': '[expr222]',
+      'redundantAttribute': 'expr162',
+      'selector': '[expr162]',
       'template': template('<!---->', [{
         'expressions': [{
           'type': expressionTypes.TEXT,
@@ -2871,9 +2929,9 @@ var _default = {
       'evaluate': function (scope) {
         return scope.state.editingName;
       },
-      'redundantAttribute': 'expr223',
-      'selector': '[expr223]',
-      'template': template('<input expr224 id="namefield" type="text" name="newname" autocomplete="off"/>', [{
+      'redundantAttribute': 'expr163',
+      'selector': '[expr163]',
+      'template': template('<input expr164 id="namefield" type="text" name="newname" autocomplete="off"/>', [{
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onsubmit',
@@ -2882,8 +2940,8 @@ var _default = {
           }
         }]
       }, {
-        'redundantAttribute': 'expr224',
-        'selector': '[expr224]',
+        'redundantAttribute': 'expr164',
+        'selector': '[expr164]',
         'expressions': [{
           'type': expressionTypes.VALUE,
           'evaluate': function (scope) {
@@ -2892,8 +2950,8 @@ var _default = {
         }]
       }])
     }, {
-      'redundantAttribute': 'expr225',
-      'selector': '[expr225]',
+      'redundantAttribute': 'expr165',
+      'selector': '[expr165]',
       'expressions': [{
         'type': expressionTypes.EVENT,
         'name': 'onclick',
@@ -2902,8 +2960,8 @@ var _default = {
         }
       }]
     }, {
-      'redundantAttribute': 'expr226',
-      'selector': '[expr226]',
+      'redundantAttribute': 'expr166',
+      'selector': '[expr166]',
       'expressions': [{
         'type': expressionTypes.EVENT,
         'name': 'onclick',
@@ -2912,8 +2970,8 @@ var _default = {
         }
       }]
     }, {
-      'redundantAttribute': 'expr227',
-      'selector': '[expr227]',
+      'redundantAttribute': 'expr167',
+      'selector': '[expr167]',
       'expressions': [{
         'type': expressionTypes.EVENT,
         'name': 'onclick',
@@ -2922,10 +2980,20 @@ var _default = {
         }
       }]
     }, {
+      'redundantAttribute': 'expr168',
+      'selector': '[expr168]',
+      'expressions': [{
+        'type': expressionTypes.EVENT,
+        'name': 'onclick',
+        'evaluate': function (scope) {
+          return scope.props.onOpenManagingDecks;
+        }
+      }]
+    }, {
       'type': bindingTypes.EACH,
       'getKey': null,
       'condition': null,
-      'template': template('<div expr229 class="xbutton">\r\n        x\r\n      </div><div expr230 class="front"><!----></div><div expr231 class="back"><!----></div>', [{
+      'template': template('<div expr170 class="xbutton">\r\n        x\r\n      </div><div expr171 class="front"><!----></div><div expr172 class="back"><!----></div>', [{
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onclick',
@@ -2940,8 +3008,8 @@ var _default = {
           }
         }]
       }, {
-        'redundantAttribute': 'expr229',
-        'selector': '[expr229]',
+        'redundantAttribute': 'expr170',
+        'selector': '[expr170]',
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onclick',
@@ -2962,8 +3030,8 @@ var _default = {
           }
         }]
       }, {
-        'redundantAttribute': 'expr230',
-        'selector': '[expr230]',
+        'redundantAttribute': 'expr171',
+        'selector': '[expr171]',
         'expressions': [{
           'type': expressionTypes.TEXT,
           'childNodeIndex': 0,
@@ -2978,8 +3046,8 @@ var _default = {
           }
         }]
       }, {
-        'redundantAttribute': 'expr231',
-        'selector': '[expr231]',
+        'redundantAttribute': 'expr172',
+        'selector': '[expr172]',
         'expressions': [{
           'type': expressionTypes.TEXT,
           'childNodeIndex': 0,
@@ -2994,8 +3062,8 @@ var _default = {
           }
         }]
       }]),
-      'redundantAttribute': 'expr228',
-      'selector': '[expr228]',
+      'redundantAttribute': 'expr169',
+      'selector': '[expr169]',
       'itemName': 'card',
       'indexName': 'i',
       'evaluate': function (scope) {
@@ -3006,7 +3074,94 @@ var _default = {
   'name': 'card-list'
 };
 exports.default = _default;
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+var _default = {
+  'css': `deck-list .smalldeck,[is="deck-list"] .smalldeck{ background-color: #e8edff; border-radius: 3px; box-shadow: 1px 1px #8f8989; width: 80%; min-width: 160px; min-height: 80px; margin: 20px auto; padding: 0.2em; cursor: pointer; text-align: center; position: relative; } deck-list .smalldeck:hover,[is="deck-list"] .smalldeck:hover{ box-shadow: 1px 1px #000; } deck-list .smalldeck .innercard,[is="deck-list"] .smalldeck .innercard{ position: absolute; top: 8px; left: 12px; width: 100%; height: 100%; border-radius: 3px; background-color: #bdccff; box-shadow: 1px 1px #8f8989; font-size: 2rem; display: flex; align-items: center; justify-content: center; } deck-list .smalldeck .innercard:hover,[is="deck-list"] .smalldeck .innercard:hover{ background-color: #bcf15b; color: #231717; } deck-list .deckcontrol,[is="deck-list"] .deckcontrol{ text-align: center; } @media (min-width: 550px) { deck-list .deckcontrol,[is="deck-list"] .deckcontrol{ padding-top: 50px; text-align: left; } } deck-list .deckcontrol button,[is="deck-list"] .deckcontrol button{ margin: 0.5em; }`,
+  'exports': {
+    selectDeck(deck, i) {
+      this.props.deck.removeFromLocalDecks(i);
+      this.props.onSelectDeck(deck);
+    },
+
+    removeDeck(i) {
+      this.props.deck.removeFromLocalDecks(i);
+      this.props.updateDeck();
+    },
+
+    addNewDeck() {
+      const emptyDeck = {
+        name: "Unnamed Deck",
+        cards: [{}]
+      };
+      this.props.onSelectDeck(emptyDeck);
+    }
+
+  },
+  'template': function (template, expressionTypes, bindingTypes, getComponent) {
+    return template('<h2>Decks</h2><p>These decks are saved locally in your browser. Use the export feature to keep a backup or to import them to a different system.</p><p><button expr421>New deck</button></p><div expr422 class="row deck"></div>', [{
+      'redundantAttribute': 'expr421',
+      'selector': '[expr421]',
+      'expressions': [{
+        'type': expressionTypes.EVENT,
+        'name': 'onclick',
+        'evaluate': function (scope) {
+          return scope.addNewDeck;
+        }
+      }]
+    }, {
+      'type': bindingTypes.EACH,
+      'getKey': null,
+      'condition': null,
+      'template': template('<div class="one-third column"><div class="smalldeck"><div expr423 class="innercard"><!----></div></div></div><div class="two-thirds column deckcontrol"><div><button expr424>\r\n            Use Deck\r\n          </button><button expr425>\r\n            Remove Deck\r\n          </button></div></div>', [{
+        'redundantAttribute': 'expr423',
+        'selector': '[expr423]',
+        'expressions': [{
+          'type': expressionTypes.TEXT,
+          'childNodeIndex': 0,
+          'evaluate': function (scope) {
+            return ['\r\n            ', scope.deck.name, '\r\n          '].join('');
+          }
+        }]
+      }, {
+        'redundantAttribute': 'expr424',
+        'selector': '[expr424]',
+        'expressions': [{
+          'type': expressionTypes.EVENT,
+          'name': 'onclick',
+          'evaluate': function (scope) {
+            return e => scope.selectDeck(scope.deck, scope.i);
+          }
+        }]
+      }, {
+        'redundantAttribute': 'expr425',
+        'selector': '[expr425]',
+        'expressions': [{
+          'type': expressionTypes.EVENT,
+          'name': 'onclick',
+          'evaluate': function (scope) {
+            return e => scope.removeDeck(scope.i);
+          }
+        }]
+      }]),
+      'redundantAttribute': 'expr422',
+      'selector': '[expr422]',
+      'itemName': 'deck',
+      'indexName': 'i',
+      'evaluate': function (scope) {
+        return scope.props.decksData;
+      }
+    }]);
+  },
+  'name': 'deck-list'
+};
+exports.default = _default;
+},{}],8:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3014,12 +3169,15 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-const CardList = require('./cardlist.riot').default;
+const CardList = require('./card-list.riot').default;
+
+const DeckList = require('./deck-list.riot').default;
 
 const {
   register
 } = require('riot');
 
+register('deck-list', DeckList);
 register('card-list', CardList);
 var _default = {
   'css': null,
@@ -3027,7 +3185,9 @@ var _default = {
     onBeforeMount() {
       this.state = {
         editingCard: false,
-        isImportExporting: false
+        isImportExporting: false,
+        isManagingDecks: false,
+        decksData: null
       };
     },
 
@@ -3061,24 +3221,92 @@ var _default = {
       this.update({
         isImportExporting: false
       });
+    },
+
+    openManagingDecks() {
+      // How this work is that
+      // we'll always save a copy of the current deck whenever
+      // we're switching deck. We'll destroy the copy of the
+      // chosen deck when we load it.
+      this.props.deck.saveCurrentDeckToLocalDecks();
+      const decksData = this.props.deck.getLocalDecks();
+      this.update({
+        isManagingDecks: true,
+        decksData: JSON.parse(decksData)
+      });
+    },
+
+    updateDeckList() {
+      const decksData = this.props.deck.getLocalDecks();
+      this.update({
+        decksData: JSON.parse(decksData)
+      });
+    },
+
+    finishManagingDecks(chosenDeck) {
+      this.props.deck.replaceDeck(chosenDeck);
+      this.props.updateDeck();
+      this.update({
+        isManagingDecks: false
+      });
     }
 
   },
   'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<div expr24></div>', [{
+    return template('<div expr416></div>', [{
       'type': bindingTypes.IF,
       'evaluate': function (scope) {
         return scope.props.show;
       },
-      'redundantAttribute': 'expr24',
-      'selector': '[expr24]',
-      'template': template('<card-list expr25></card-list><card-edit expr26></card-edit><import-exporter expr27></import-exporter>', [{
+      'redundantAttribute': 'expr416',
+      'selector': '[expr416]',
+      'template': template('<deck-list expr417></deck-list><card-list expr418></card-list><card-edit expr419></card-edit><import-exporter expr420></import-exporter>', [{
         'type': bindingTypes.IF,
         'evaluate': function (scope) {
-          return !scope.state.editingCard && !scope.state.isImportExporting;
+          return scope.state.isManagingDecks;
         },
-        'redundantAttribute': 'expr25',
-        'selector': '[expr25]',
+        'redundantAttribute': 'expr417',
+        'selector': '[expr417]',
+        'template': template(null, [{
+          'type': bindingTypes.TAG,
+          'getComponent': getComponent,
+          'evaluate': function (scope) {
+            return 'deck-list';
+          },
+          'slots': [],
+          'attributes': [{
+            'type': expressionTypes.ATTRIBUTE,
+            'name': 'deck',
+            'evaluate': function (scope) {
+              return scope.props.deck;
+            }
+          }, {
+            'type': expressionTypes.ATTRIBUTE,
+            'name': 'update-deck',
+            'evaluate': function (scope) {
+              return scope.updateDeckList;
+            }
+          }, {
+            'type': expressionTypes.ATTRIBUTE,
+            'name': 'decks-data',
+            'evaluate': function (scope) {
+              return scope.state.decksData;
+            }
+          }, {
+            'type': expressionTypes.EVENT,
+            'name': 'on-select-deck',
+            'evaluate': function (scope) {
+              return d => scope.finishManagingDecks(d);
+            }
+          }]
+        }])
+      }, {
+        'type': bindingTypes.IF,
+        'evaluate': function (scope) {
+          return !scope.state.editingCard && !scope.state.isImportExporting && !scope.state.isManagingDecks;
+        },
+        'redundantAttribute': 'expr418',
+        'selector': '[expr418]',
         'template': template(null, [{
           'type': bindingTypes.TAG,
           'getComponent': getComponent,
@@ -3112,6 +3340,12 @@ var _default = {
             }
           }, {
             'type': expressionTypes.EVENT,
+            'name': 'on-open-managing-decks',
+            'evaluate': function (scope) {
+              return scope.openManagingDecks;
+            }
+          }, {
+            'type': expressionTypes.EVENT,
             'name': 'on-click-card',
             'evaluate': function (scope) {
               return i => scope.editCard(i);
@@ -3129,8 +3363,8 @@ var _default = {
         'evaluate': function (scope) {
           return scope.state.editingCard;
         },
-        'redundantAttribute': 'expr26',
-        'selector': '[expr26]',
+        'redundantAttribute': 'expr419',
+        'selector': '[expr419]',
         'template': template(null, [{
           'type': bindingTypes.TAG,
           'getComponent': getComponent,
@@ -3163,8 +3397,8 @@ var _default = {
         'evaluate': function (scope) {
           return scope.state.isImportExporting;
         },
-        'redundantAttribute': 'expr27',
-        'selector': '[expr27]',
+        'redundantAttribute': 'expr420',
+        'selector': '[expr420]',
         'template': template(null, [{
           'type': bindingTypes.TAG,
           'getComponent': getComponent,
@@ -3198,7 +3432,7 @@ var _default = {
   'name': 'deck-edit-container'
 };
 exports.default = _default;
-},{"./cardlist.riot":5,"riot":1}],7:[function(require,module,exports){
+},{"./card-list.riot":6,"./deck-list.riot":7,"riot":1}],9:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3206,15 +3440,25 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 var _default = {
-  'css': `footernav,[is="footernav"]{ width: 100%; display: flex; position: absolute; justify-content: space-between; height: 60px; margin-top: 100px; }`,
+  'css': `footernav,[is="footernav"]{ width: 100%; display: flex; position: absolute; justify-content: space-between; height: 60px; margin-top: 100px; } footernav div,[is="footernav"] div{ margin: 0 1em; }`,
   'exports': null,
   'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<div>\r\n    V0.9\r\n  </div><div>\r\n    Made by Aliya N. Anindita a.k.a. <a href="https://pseudomon.github.io">PseudoMon</a></div><div><a href="https://github.com/PseudoMon/lightningcards">Repo</a></div>', []);
+    return template('<div>\r\n    V1.0\r\n  </div><div><a expr568 href="#">About</a></div>', [{
+      'redundantAttribute': 'expr568',
+      'selector': '[expr568]',
+      'expressions': [{
+        'type': expressionTypes.EVENT,
+        'name': 'onclick',
+        'evaluate': function (scope) {
+          return scope.props.onClickAbout;
+        }
+      }]
+    }]);
   },
   'name': 'footernav'
 };
 exports.default = _default;
-},{}],8:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3283,9 +3527,9 @@ var _default = {
 
   },
   'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<div expr473 class="label"><!----></div><div class="maintext"><span expr474></span><form expr475></form></div><div class="synonyms"><span expr477 class="syn"></span><form expr479></form><button expr481></button></div>', [{
-      'redundantAttribute': 'expr473',
-      'selector': '[expr473]',
+    return template('<div expr33 class="label"><!----></div><div class="maintext"><span expr34></span><form expr35></form></div><div class="synonyms"><span expr37 class="syn"></span><form expr39></form><button expr41></button></div>', [{
+      'redundantAttribute': 'expr33',
+      'selector': '[expr33]',
       'expressions': [{
         'type': expressionTypes.TEXT,
         'childNodeIndex': 0,
@@ -3298,8 +3542,8 @@ var _default = {
       'evaluate': function (scope) {
         return !scope.state.editing;
       },
-      'redundantAttribute': 'expr474',
-      'selector': '[expr474]',
+      'redundantAttribute': 'expr34',
+      'selector': '[expr34]',
       'template': template('<!---->', [{
         'expressions': [{
           'type': expressionTypes.TEXT,
@@ -3320,9 +3564,9 @@ var _default = {
       'evaluate': function (scope) {
         return scope.state.editing;
       },
-      'redundantAttribute': 'expr475',
-      'selector': '[expr475]',
-      'template': template('<input expr476 id="mainfield" type="text" autocomplete="off"/>', [{
+      'redundantAttribute': 'expr35',
+      'selector': '[expr35]',
+      'template': template('<input expr36 id="mainfield" type="text" autocomplete="off"/>', [{
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onsubmit',
@@ -3331,8 +3575,8 @@ var _default = {
           }
         }]
       }, {
-        'redundantAttribute': 'expr476',
-        'selector': '[expr476]',
+        'redundantAttribute': 'expr36',
+        'selector': '[expr36]',
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'oninput',
@@ -3350,7 +3594,7 @@ var _default = {
       'type': bindingTypes.EACH,
       'getKey': null,
       'condition': null,
-      'template': template('<!----><span expr478 class="xbutton">x</span>', [{
+      'template': template('<!----><span expr38 class="xbutton">x</span>', [{
         'expressions': [{
           'type': expressionTypes.TEXT,
           'childNodeIndex': 0,
@@ -3359,8 +3603,8 @@ var _default = {
           }
         }]
       }, {
-        'redundantAttribute': 'expr478',
-        'selector': '[expr478]',
+        'redundantAttribute': 'expr38',
+        'selector': '[expr38]',
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onclick',
@@ -3369,8 +3613,8 @@ var _default = {
           }
         }]
       }]),
-      'redundantAttribute': 'expr477',
-      'selector': '[expr477]',
+      'redundantAttribute': 'expr37',
+      'selector': '[expr37]',
       'itemName': 'syn',
       'indexName': 'i',
       'evaluate': function (scope) {
@@ -3381,9 +3625,9 @@ var _default = {
       'evaluate': function (scope) {
         return scope.state.addingSyn;
       },
-      'redundantAttribute': 'expr479',
-      'selector': '[expr479]',
-      'template': template('<input expr480 id="synfield" type="text" autocomplete="off"/><button type="submit">Submit</button>', [{
+      'redundantAttribute': 'expr39',
+      'selector': '[expr39]',
+      'template': template('<input expr40 id="synfield" type="text" autocomplete="off"/><button type="submit">Submit</button>', [{
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onsubmit',
@@ -3392,8 +3636,8 @@ var _default = {
           }
         }]
       }, {
-        'redundantAttribute': 'expr480',
-        'selector': '[expr480]',
+        'redundantAttribute': 'expr40',
+        'selector': '[expr40]',
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'oninput',
@@ -3412,8 +3656,8 @@ var _default = {
       'evaluate': function (scope) {
         return !scope.state.addingSyn;
       },
-      'redundantAttribute': 'expr481',
-      'selector': '[expr481]',
+      'redundantAttribute': 'expr41',
+      'selector': '[expr41]',
       'template': template('Add synonym', [{
         'expressions': [{
           'type': expressionTypes.EVENT,
@@ -3428,7 +3672,7 @@ var _default = {
   'name': 'half-card'
 };
 exports.default = _default;
-},{}],9:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3436,22 +3680,28 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 var _default = {
-  'css': `headnav,[is="headnav"]{ width: 100%; display: flex; justify-content: space-between; height: 60px; margin-bottom: 20px; } headnav .title,[is="headnav"] .title{ font-weight: 500; } headnav h1,[is="headnav"] h1{line-height: 60px; } headnav div,[is="headnav"] div{line-height: 60px; } headnav .navlinks,[is="headnav"] .navlinks{ display: none; } @media (min-width: 750px) { headnav .navlinks,[is="headnav"] .navlinks{ display: block; } } headnav .navlinks a,[is="headnav"] .navlinks a{ margin: 0 1.2em; text-decoration: none; }`,
+  'css': `headnav,[is="headnav"]{ width: 100%; display: flex; justify-content: space-between; height: 60px; margin-bottom: 20px; } headnav .title,[is="headnav"] .title{ font-weight: 500; cursor: pointer; } headnav h1,[is="headnav"] h1{line-height: 60px; } headnav div,[is="headnav"] div{line-height: 60px; } headnav .navlinks,[is="headnav"] .navlinks{ display: none; } @media (min-width: 750px) { headnav .navlinks,[is="headnav"] .navlinks{ display: block; } } headnav .navlinks a,[is="headnav"] .navlinks a{ margin: 0 1.2em; text-decoration: none; }`,
   'exports': null,
   'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<div expr332 class="title"><!----></div><div class="navlinks"><a expr333 href="#mainmenu">Main Menu</a><a expr334 href="#deckview">View Deck</a><a expr335 href="#playing">Start Practice</a></div><div class="sessioncounter"><span expr336 class="correct"><!----></span>/<span expr337 class="wrong"><!----></span>/<span expr338 class="total"><!----></span></div>', [{
-      'redundantAttribute': 'expr332',
-      'selector': '[expr332]',
+    return template('<div expr540 class="title"><!----></div><div class="navlinks"><a expr541 href="#">Main Menu</a><a expr542 href="#">View Deck</a><a expr543 href="#">Start Practice</a></div><div class="sessioncounter"><span expr544 class="correct"><!----></span>/<span expr545 class="wrong"><!----></span>/<span expr546 class="total"><!----></span></div>', [{
+      'redundantAttribute': 'expr540',
+      'selector': '[expr540]',
       'expressions': [{
         'type': expressionTypes.TEXT,
         'childNodeIndex': 0,
         'evaluate': function (scope) {
           return scope.props.title;
         }
+      }, {
+        'type': expressionTypes.EVENT,
+        'name': 'onclick',
+        'evaluate': function (scope) {
+          return () => scope.props.onOpenScreen('main menu');
+        }
       }]
     }, {
-      'redundantAttribute': 'expr333',
-      'selector': '[expr333]',
+      'redundantAttribute': 'expr541',
+      'selector': '[expr541]',
       'expressions': [{
         'type': expressionTypes.EVENT,
         'name': 'onclick',
@@ -3460,8 +3710,8 @@ var _default = {
         }
       }]
     }, {
-      'redundantAttribute': 'expr334',
-      'selector': '[expr334]',
+      'redundantAttribute': 'expr542',
+      'selector': '[expr542]',
       'expressions': [{
         'type': expressionTypes.EVENT,
         'name': 'onclick',
@@ -3470,8 +3720,8 @@ var _default = {
         }
       }]
     }, {
-      'redundantAttribute': 'expr335',
-      'selector': '[expr335]',
+      'redundantAttribute': 'expr543',
+      'selector': '[expr543]',
       'expressions': [{
         'type': expressionTypes.EVENT,
         'name': 'onclick',
@@ -3480,8 +3730,8 @@ var _default = {
         }
       }]
     }, {
-      'redundantAttribute': 'expr336',
-      'selector': '[expr336]',
+      'redundantAttribute': 'expr544',
+      'selector': '[expr544]',
       'expressions': [{
         'type': expressionTypes.TEXT,
         'childNodeIndex': 0,
@@ -3490,8 +3740,8 @@ var _default = {
         }
       }]
     }, {
-      'redundantAttribute': 'expr337',
-      'selector': '[expr337]',
+      'redundantAttribute': 'expr545',
+      'selector': '[expr545]',
       'expressions': [{
         'type': expressionTypes.TEXT,
         'childNodeIndex': 0,
@@ -3500,8 +3750,8 @@ var _default = {
         }
       }]
     }, {
-      'redundantAttribute': 'expr338',
-      'selector': '[expr338]',
+      'redundantAttribute': 'expr546',
+      'selector': '[expr546]',
       'expressions': [{
         'type': expressionTypes.TEXT,
         'childNodeIndex': 0,
@@ -3514,7 +3764,7 @@ var _default = {
   'name': 'headnav'
 };
 exports.default = _default;
-},{}],10:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3522,7 +3772,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 var _default = {
-  'css': `import-exporter,[is="import-exporter"]{ display: block; text-align: center; } import-exporter textarea,[is="import-exporter"] textarea{ min-width: 80%; }`,
+  'css': `import-exporter,[is="import-exporter"]{ display: block; text-align: center; } import-exporter textarea,[is="import-exporter"] textarea{ min-width: 80%; } import-exporter .import,[is="import-exporter"] .import{ margin-top: 40px; }`,
   'exports': {
     onBeforeMount() {
       this.state = {
@@ -3566,9 +3816,9 @@ var _default = {
 
   },
   'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<div class="export"><h3>Deck Export</h3><p>Select everything in the textarea below and copy it somewhere safe.</p><div><textarea expr5><!----></textarea></div></div><div class="import"><h3>Import Deck</h3><p>Paste card data here.</p><div><textarea expr6><!----></textarea></div><div><button expr7>Click to import cards</button></div><h5 expr8></h5></div><div><button expr9>Go Back</button></div>', [{
-      'redundantAttribute': 'expr5',
-      'selector': '[expr5]',
+    return template('<div class="export"><h3>Deck Export</h3><p>Select everything in the textarea below and copy it somewhere safe.</p><div><textarea expr446><!----></textarea></div></div><div class="import"><h3>Import Deck</h3><p>This will completely replace your current deck with the imported deck. If you want to keep your current deck, create a new deck in Manage Decks menu.</p><p>Paste card data below and click the button.</p><div><textarea expr447><!----></textarea></div><div><button expr448>Click to import cards</button></div><h5 expr449></h5></div><div><button expr450>Go Back</button></div>', [{
+      'redundantAttribute': 'expr446',
+      'selector': '[expr446]',
       'expressions': [{
         'type': expressionTypes.TEXT,
         'childNodeIndex': 0,
@@ -3577,8 +3827,8 @@ var _default = {
         }
       }]
     }, {
-      'redundantAttribute': 'expr6',
-      'selector': '[expr6]',
+      'redundantAttribute': 'expr447',
+      'selector': '[expr447]',
       'expressions': [{
         'type': expressionTypes.TEXT,
         'childNodeIndex': 0,
@@ -3593,8 +3843,8 @@ var _default = {
         }
       }]
     }, {
-      'redundantAttribute': 'expr7',
-      'selector': '[expr7]',
+      'redundantAttribute': 'expr448',
+      'selector': '[expr448]',
       'expressions': [{
         'type': expressionTypes.EVENT,
         'name': 'onclick',
@@ -3607,12 +3857,12 @@ var _default = {
       'evaluate': function (scope) {
         return scope.state.imported;
       },
-      'redundantAttribute': 'expr8',
-      'selector': '[expr8]',
+      'redundantAttribute': 'expr449',
+      'selector': '[expr449]',
       'template': template('Ok!', [])
     }, {
-      'redundantAttribute': 'expr9',
-      'selector': '[expr9]',
+      'redundantAttribute': 'expr450',
+      'selector': '[expr450]',
       'expressions': [{
         'type': expressionTypes.EVENT,
         'name': 'onclick',
@@ -3625,7 +3875,7 @@ var _default = {
   'name': 'import-exporter'
 };
 exports.default = _default;
-},{}],11:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3641,16 +3891,16 @@ var _default = {
 
   },
   'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<div expr339></div>', [{
+    return template('<div expr5></div>', [{
       'type': bindingTypes.IF,
       'evaluate': function (scope) {
         return scope.props.show;
       },
-      'redundantAttribute': 'expr339',
-      'selector': '[expr339]',
-      'template': template('<h3>Welcome to Lightning Cards</h3><div><p>Your currently loaded deck is\r\n        <span expr340 class="decktitle"><!----></span></p><p>Your current practice setting is\r\n      <select expr341 class="setting"><option value="default">Default (Front->Back)</option><option value="reverse">Reverse (Back->Front)</option></select></p></div><div><button expr342>Start Practice</button><button expr343>See/Edit Deck</button></div>', [{
-        'redundantAttribute': 'expr340',
-        'selector': '[expr340]',
+      'redundantAttribute': 'expr5',
+      'selector': '[expr5]',
+      'template': template('<h3>Welcome to Lightning Cards</h3><div><p>Your currently loaded deck is\r\n        <span expr6 class="decktitle"><!----></span></p><p>Your current practice setting is\r\n      <select expr7 class="setting"><option value="default">Default (Front->Back)</option><option value="reverse">Reverse (Back->Front)</option></select></p></div><div><button expr8>Start Practice</button><button expr9>See/Edit Deck</button></div>', [{
+        'redundantAttribute': 'expr6',
+        'selector': '[expr6]',
         'expressions': [{
           'type': expressionTypes.TEXT,
           'childNodeIndex': 0,
@@ -3659,8 +3909,8 @@ var _default = {
           }
         }]
       }, {
-        'redundantAttribute': 'expr341',
-        'selector': '[expr341]',
+        'redundantAttribute': 'expr7',
+        'selector': '[expr7]',
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onchange',
@@ -3669,8 +3919,8 @@ var _default = {
           }
         }]
       }, {
-        'redundantAttribute': 'expr342',
-        'selector': '[expr342]',
+        'redundantAttribute': 'expr8',
+        'selector': '[expr8]',
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onclick',
@@ -3679,8 +3929,8 @@ var _default = {
           }
         }]
       }, {
-        'redundantAttribute': 'expr343',
-        'selector': '[expr343]',
+        'redundantAttribute': 'expr9',
+        'selector': '[expr9]',
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onclick',
@@ -3694,7 +3944,7 @@ var _default = {
   'name': 'main-menu'
 };
 exports.default = _default;
-},{}],12:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3797,9 +4047,9 @@ var _default = {
 
   },
   'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<div expr428><div expr429 class="question"><!----></div><div expr430 class="answer"></div><div expr431 class="synonym"></div></div><div expr434 class="card-answer asking"></div><div expr437 class="card-answer answered"></div>', [{
-      'redundantAttribute': 'expr428',
-      'selector': '[expr428]',
+    return template('<div expr45><div expr46 class="question"><!----></div><div expr47 class="answer"></div><div expr48 class="synonym"></div></div><div expr51 class="card-answer asking"></div><div expr54 class="card-answer answered"></div>', [{
+      'redundantAttribute': 'expr45',
+      'selector': '[expr45]',
       'expressions': [{
         'type': expressionTypes.ATTRIBUTE,
         'name': 'class',
@@ -3808,8 +4058,8 @@ var _default = {
         }
       }]
     }, {
-      'redundantAttribute': 'expr429',
-      'selector': '[expr429]',
+      'redundantAttribute': 'expr46',
+      'selector': '[expr46]',
       'expressions': [{
         'type': expressionTypes.TEXT,
         'childNodeIndex': 0,
@@ -3822,8 +4072,8 @@ var _default = {
       'evaluate': function (scope) {
         return !scope.state.asking;
       },
-      'redundantAttribute': 'expr430',
-      'selector': '[expr430]',
+      'redundantAttribute': 'expr47',
+      'selector': '[expr47]',
       'template': template('<!---->', [{
         'expressions': [{
           'type': expressionTypes.TEXT,
@@ -3838,9 +4088,9 @@ var _default = {
       'evaluate': function (scope) {
         return !scope.state.asking;
       },
-      'redundantAttribute': 'expr431',
-      'selector': '[expr431]',
-      'template': template('<span expr432 class="syn"></span><span expr433 class="syn"></span>', [{
+      'redundantAttribute': 'expr48',
+      'selector': '[expr48]',
+      'template': template('<span expr49 class="syn"></span><span expr50 class="syn"></span>', [{
         'type': bindingTypes.EACH,
         'getKey': null,
         'condition': function (scope) {
@@ -3855,8 +4105,8 @@ var _default = {
             }
           }]
         }]),
-        'redundantAttribute': 'expr432',
-        'selector': '[expr432]',
+        'redundantAttribute': 'expr49',
+        'selector': '[expr49]',
         'itemName': 'syn',
         'indexName': null,
         'evaluate': function (scope) {
@@ -3877,8 +4127,8 @@ var _default = {
             }
           }]
         }]),
-        'redundantAttribute': 'expr433',
-        'selector': '[expr433]',
+        'redundantAttribute': 'expr50',
+        'selector': '[expr50]',
         'itemName': 'syn',
         'indexName': null,
         'evaluate': function (scope) {
@@ -3890,11 +4140,11 @@ var _default = {
       'evaluate': function (scope) {
         return scope.state.asking;
       },
-      'redundantAttribute': 'expr434',
-      'selector': '[expr434]',
-      'template': template('<form><input expr435 id="answerinput" type="text" autocomplete="off" placeholder="Answer"/><button expr436 class="button-primary">Enter</button></form>', [{
-        'redundantAttribute': 'expr435',
-        'selector': '[expr435]',
+      'redundantAttribute': 'expr51',
+      'selector': '[expr51]',
+      'template': template('<form><input expr52 id="answerinput" type="text" autocomplete="off" placeholder="Answer"/><button expr53 class="button-primary">Enter</button></form>', [{
+        'redundantAttribute': 'expr52',
+        'selector': '[expr52]',
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'oninput',
@@ -3903,8 +4153,8 @@ var _default = {
           }
         }]
       }, {
-        'redundantAttribute': 'expr436',
-        'selector': '[expr436]',
+        'redundantAttribute': 'expr53',
+        'selector': '[expr53]',
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onclick',
@@ -3918,11 +4168,11 @@ var _default = {
       'evaluate': function (scope) {
         return !scope.state.asking;
       },
-      'redundantAttribute': 'expr437',
-      'selector': '[expr437]',
-      'template': template('<button expr438 class="button">Edit card</button><button expr439 id="nextbutton" class="button-primary">Next</button>', [{
-        'redundantAttribute': 'expr438',
-        'selector': '[expr438]',
+      'redundantAttribute': 'expr54',
+      'selector': '[expr54]',
+      'template': template('<button expr55 class="button">Edit card</button><button expr56 id="nextbutton" class="button-primary">Next</button>', [{
+        'redundantAttribute': 'expr55',
+        'selector': '[expr55]',
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onclick',
@@ -3931,8 +4181,8 @@ var _default = {
           }
         }]
       }, {
-        'redundantAttribute': 'expr439',
-        'selector': '[expr439]',
+        'redundantAttribute': 'expr56',
+        'selector': '[expr56]',
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onclick',
@@ -3946,7 +4196,7 @@ var _default = {
   'name': 'card-display'
 };
 exports.default = _default;
-},{}],13:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3968,9 +4218,9 @@ var _default = {
 
   },
   'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<h3>Session done!</h3><p expr62><!----></p><div><button expr63>Practice again</button><button expr64>Edit deck</button></div>', [{
-      'redundantAttribute': 'expr62',
-      'selector': '[expr62]',
+    return template('<h3>Session done!</h3><p expr42><!----></p><div><button expr43>Practice again</button><button expr44>Edit deck</button></div>', [{
+      'redundantAttribute': 'expr42',
+      'selector': '[expr42]',
       'expressions': [{
         'type': expressionTypes.TEXT,
         'childNodeIndex': 0,
@@ -3979,8 +4229,8 @@ var _default = {
         }
       }]
     }, {
-      'redundantAttribute': 'expr63',
-      'selector': '[expr63]',
+      'redundantAttribute': 'expr43',
+      'selector': '[expr43]',
       'expressions': [{
         'type': expressionTypes.EVENT,
         'name': 'onclick',
@@ -3989,8 +4239,8 @@ var _default = {
         }
       }]
     }, {
-      'redundantAttribute': 'expr64',
-      'selector': '[expr64]',
+      'redundantAttribute': 'expr44',
+      'selector': '[expr44]',
       'expressions': [{
         'type': expressionTypes.EVENT,
         'name': 'onclick',
@@ -4003,7 +4253,7 @@ var _default = {
   'name': 'end-screen'
 };
 exports.default = _default;
-},{}],14:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -4055,20 +4305,20 @@ var _default = {
 
   },
   'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<div expr316></div>', [{
+    return template('<div expr29></div>', [{
       'type': bindingTypes.IF,
       'evaluate': function (scope) {
         return scope.props.show;
       },
-      'redundantAttribute': 'expr316',
-      'selector': '[expr316]',
-      'template': template('<card-display expr317></card-display><card-edit expr318></card-edit><end-screen expr319></end-screen>', [{
+      'redundantAttribute': 'expr29',
+      'selector': '[expr29]',
+      'template': template('<card-display expr30></card-display><card-edit expr31></card-edit><end-screen expr32></end-screen>', [{
         'type': bindingTypes.IF,
         'evaluate': function (scope) {
           return !scope.state.editing && !scope.props.outOfCards;
         },
-        'redundantAttribute': 'expr317',
-        'selector': '[expr317]',
+        'redundantAttribute': 'expr30',
+        'selector': '[expr30]',
         'template': template(null, [{
           'type': bindingTypes.TAG,
           'getComponent': getComponent,
@@ -4119,8 +4369,8 @@ var _default = {
         'evaluate': function (scope) {
           return scope.state.editing;
         },
-        'redundantAttribute': 'expr318',
-        'selector': '[expr318]',
+        'redundantAttribute': 'expr31',
+        'selector': '[expr31]',
         'template': template(null, [{
           'type': bindingTypes.TAG,
           'getComponent': getComponent,
@@ -4153,8 +4403,8 @@ var _default = {
         'evaluate': function (scope) {
           return scope.props.outOfCards;
         },
-        'redundantAttribute': 'expr319',
-        'selector': '[expr319]',
+        'redundantAttribute': 'expr32',
+        'selector': '[expr32]',
         'template': template(null, [{
           'type': bindingTypes.TAG,
           'getComponent': getComponent,
@@ -4188,7 +4438,7 @@ var _default = {
   'name': 'playing-container'
 };
 exports.default = _default;
-},{"./carddisplay.riot":12,"./end-screen.riot":13,"riot":1}],15:[function(require,module,exports){
+},{"./carddisplay.riot":14,"./end-screen.riot":15,"riot":1}],17:[function(require,module,exports){
 // Utility function to shuffle array
 // Using the Fisher-Yates shuffle
 // Thanks academia!
@@ -4367,17 +4617,46 @@ class Deck {
     this.replaceDeck(importedDeck)
   }
 
-  getDecksDataFromLocalStorage() {
+  getLocalDecks() {
     // This function retrieve all saved deck data
     // and return them without processing
     const decksData = localStorage.getItem("alldecks")
 
     // If there's no data stored, return
-    if (!decksToImport) { return }
+    if (!decksData) { return }
 
     return decksData
   }
 
+  saveCurrentDeckToLocalDecks() {
+    // Local Decks is just all the decks currently saved in Local Storage
+    // This method is useful for when you want to change the current deck
+    const cards = this.cards
+    const deck = { name: this.name, cards: cards }
+
+    const oldDecks = JSON.parse(localStorage.getItem("alldecks"))
+    let newDecks
+
+    // If there's none stored yet, make a new array
+    if (oldDecks) {
+      newDecks = oldDecks.concat([deck])
+    }
+    else {
+      newDecks = [deck]
+    }
+
+    localStorage.setItem("alldecks", JSON.stringify(newDecks))
+  }
+
+  removeFromLocalDecks(i) {
+    let newDecks = JSON.parse(localStorage.getItem("alldecks")).slice()
+    newDecks.splice(i, 1)
+    localStorage.setItem("alldecks", JSON.stringify(newDecks))
+  }
+
+  destroyLocalDecks() {
+    localStorage.removeItem("alldecks")
+  }
 
 }
 
@@ -4386,4 +4665,4 @@ const currentDeck = new Deck(sampleCards)
 
 module.exports = currentDeck
 
-},{}]},{},[2]);
+},{}]},{},[3]);

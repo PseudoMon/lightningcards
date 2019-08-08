@@ -6,6 +6,7 @@ const CardEdit = require('./cardedit.riot').default
 const PlayingContainer = require('./playing/playing-container.riot').default
 const DeckEditContainer = require('./deck-view/deckeditcontainer.riot').default
 const MainMenu = require('./main-menu.riot').default
+const About = require('./about.riot').default
 
 const { registerPreprocessor, register, mount } = require('riot')
 
@@ -24,6 +25,7 @@ register('card-edit', CardEdit)
 register('playing-container', PlayingContainer)
 register('deck-edit-container', DeckEditContainer)
 register('main-menu', MainMenu)
+register('about', About)
 
 // Mounting the main app
 mount('container', {deck: deck})

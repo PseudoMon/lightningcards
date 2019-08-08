@@ -176,17 +176,46 @@ class Deck {
     this.replaceDeck(importedDeck)
   }
 
-  getDecksDataFromLocalStorage() {
+  getLocalDecks() {
     // This function retrieve all saved deck data
     // and return them without processing
     const decksData = localStorage.getItem("alldecks")
 
     // If there's no data stored, return
-    if (!decksToImport) { return }
+    if (!decksData) { return }
 
     return decksData
   }
 
+  saveCurrentDeckToLocalDecks() {
+    // Local Decks is just all the decks currently saved in Local Storage
+    // This method is useful for when you want to change the current deck
+    const cards = this.cards
+    const deck = { name: this.name, cards: cards }
+
+    const oldDecks = JSON.parse(localStorage.getItem("alldecks"))
+    let newDecks
+
+    // If there's none stored yet, make a new array
+    if (oldDecks) {
+      newDecks = oldDecks.concat([deck])
+    }
+    else {
+      newDecks = [deck]
+    }
+
+    localStorage.setItem("alldecks", JSON.stringify(newDecks))
+  }
+
+  removeFromLocalDecks(i) {
+    let newDecks = JSON.parse(localStorage.getItem("alldecks")).slice()
+    newDecks.splice(i, 1)
+    localStorage.setItem("alldecks", JSON.stringify(newDecks))
+  }
+
+  destroyLocalDecks() {
+    localStorage.removeItem("alldecks")
+  }
 
 }
 
