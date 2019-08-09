@@ -7,14 +7,22 @@
     </div>
 
     <div class="sessioncounter">
-      <span class="correct">
-        { props.session.correctCounter }
-      </span>/<span class="wrong">
-        { props.session.playedCounter }
-      </span>/<span class="total">
-        { props.session.totalCount } Cards
+      <span if={ props.isPlaying }>
+        <span class="correct">
+          { props.session.correctCounter }
+        </span>/<span class="played">
+          { props.session.playedCounter }
+        </span>/<span class="total">
+          { props.session.totalCount } Cards
+        </span>
+      </span>
+
+      <span if={ !props.isPlaying }>
+        { props.session.totalCount } cards in deck
       </span>
      </div>
+
+
 
   <style>
     :host {
@@ -44,6 +52,16 @@
       margin: 0 1.2em;
       text-decoration: none;
     }
+
+    .correct {
+      font-weight: 500;
+      color: #71a314;
+    }
+
+    .played {
+      font-weight: 500;
+    }
+
 
 
   </style>

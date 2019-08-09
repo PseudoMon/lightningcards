@@ -9,6 +9,7 @@
     <headnav
       title="Lightning Cards"
       session={ props.deck.currentSession }
+      is-playing={ state.currentScreen === 'playing' }
       on-open-screen={ (screen) => openScreen(screen) }
     >
     </headnav>
