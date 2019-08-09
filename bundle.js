@@ -3982,7 +3982,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 var _default = {
-  'css': `card-display .card,[is="card-display"] .card{ text-align: center; font-size: 3rem; width: 80%; margin: 2.5rem auto; padding: 0.5rem 2rem; border-radius: 5px; background-color: #eeeeee; box-shadow: 5px 5px #8f8989; height: 120px; display: flex; flex-direction: column; justify-content: center; } @media (min-width: 750px) { card-display .card,[is="card-display"] .card{ height: 300px; font-size: 5rem; } } card-display .card.correct,[is="card-display"] .card.correct{ background-color: #bcf15b; color: #231717; } card-display .card.wrong,[is="card-display"] .card.wrong{ background-color: #FF6860; color: #563737; } card-display .card.wrong .answer,[is="card-display"] .card.wrong .answer{ color: #fff; } card-display .answered .question,[is="card-display"] .answered .question{ font-size: 0.8em; opacity: 0.5; } card-display .answered .synonym,[is="card-display"] .answered .synonym{ font-size: 0.5em; } card-display .syn,[is="card-display"] .syn{ padding: 0.1em 0.2em; } card-display .syn::after,[is="card-display"] .syn::after{ content: ", "; } card-display .syn:last-of-type::after,[is="card-display"] .syn:last-of-type::after{ content: ""; } card-display .card-answer,[is="card-display"] .card-answer{ width: 80%; margin: 1rem auto; padding: 0 0.5rem; text-align: center; } card-display .card-answer.answered button,[is="card-display"] .card-answer.answered button{ margin: 1em 2em; } card-display .card-answer input,[is="card-display"] .card-answer input{ width: 80%; text-align: center; } card-display .card-answer.asking .button-primary,[is="card-display"] .card-answer.asking .button-primary{ width: 60%; }`,
+  'css': `card-display .card,[is="card-display"] .card{ text-align: center; font-size: 3rem; width: 80%; margin: 2.5rem auto; padding: 0.5rem 2rem; border-radius: 5px; background-color: #eeeeee; box-shadow: 5px 5px #8f8989; height: 120px; display: flex; flex-direction: column; justify-content: center; } @media (min-width: 750px) { card-display .card,[is="card-display"] .card{ height: 300px; font-size: 5rem; } } card-display .card.correct,[is="card-display"] .card.correct{ background-color: #bcf15b; color: #231717; } card-display .card.wrong,[is="card-display"] .card.wrong{ background-color: #FF6860; color: #563737; } card-display .card.wrong .answer,[is="card-display"] .card.wrong .answer{ color: #fff; } card-display .answered .question,[is="card-display"] .answered .question{ font-size: 0.8em; opacity: 0.5; } card-display .answered .synonym,[is="card-display"] .answered .synonym{ font-size: 0.5em; } card-display .syn,[is="card-display"] .syn{ padding: 0.1em 0.2em; } card-display .syn::after,[is="card-display"] .syn::after{ content: ", "; } card-display .syn:last-of-type::after,[is="card-display"] .syn:last-of-type::after{ content: ""; } card-display .card-answer,[is="card-display"] .card-answer{ width: 80%; margin: 1rem auto; padding: 0 0.5rem; text-align: center; } card-display .card-answer.answered button,[is="card-display"] .card-answer.answered button{ margin: 1em 2em; } card-display .card-answer input,[is="card-display"] .card-answer input{ width: 80%; text-align: center; } card-display .card-answer.answered input,[is="card-display"] .card-answer.answered input{ background-color: silver; color: gray; } card-display .card-answer.asking .button-primary,[is="card-display"] .card-answer.asking .button-primary{ width: 60%; }`,
   'exports': {
     onBeforeMount() {
       this.state = {
@@ -4077,9 +4077,9 @@ var _default = {
 
   },
   'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<div expr66><div expr67 class="question"><!----></div><div expr68 class="answer"></div><div expr69 class="synonym"></div></div><div expr72 class="card-answer asking"></div><div expr75 class="card-answer answered"></div>', [{
-      'redundantAttribute': 'expr66',
-      'selector': '[expr66]',
+    return template('<div expr255><div expr256 class="question"><!----></div><div expr257 class="answer"></div><div expr258 class="synonym"></div></div><div expr261 class="card-answer asking"></div><div expr264 class="card-answer answered"></div>', [{
+      'redundantAttribute': 'expr255',
+      'selector': '[expr255]',
       'expressions': [{
         'type': expressionTypes.ATTRIBUTE,
         'name': 'class',
@@ -4088,8 +4088,8 @@ var _default = {
         }
       }]
     }, {
-      'redundantAttribute': 'expr67',
-      'selector': '[expr67]',
+      'redundantAttribute': 'expr256',
+      'selector': '[expr256]',
       'expressions': [{
         'type': expressionTypes.TEXT,
         'childNodeIndex': 0,
@@ -4102,8 +4102,8 @@ var _default = {
       'evaluate': function (scope) {
         return !scope.state.asking;
       },
-      'redundantAttribute': 'expr68',
-      'selector': '[expr68]',
+      'redundantAttribute': 'expr257',
+      'selector': '[expr257]',
       'template': template('<!---->', [{
         'expressions': [{
           'type': expressionTypes.TEXT,
@@ -4118,9 +4118,9 @@ var _default = {
       'evaluate': function (scope) {
         return !scope.state.asking;
       },
-      'redundantAttribute': 'expr69',
-      'selector': '[expr69]',
-      'template': template('<span expr70 class="syn"></span><span expr71 class="syn"></span>', [{
+      'redundantAttribute': 'expr258',
+      'selector': '[expr258]',
+      'template': template('<span expr259 class="syn"></span><span expr260 class="syn"></span>', [{
         'type': bindingTypes.EACH,
         'getKey': null,
         'condition': function (scope) {
@@ -4135,8 +4135,8 @@ var _default = {
             }
           }]
         }]),
-        'redundantAttribute': 'expr70',
-        'selector': '[expr70]',
+        'redundantAttribute': 'expr259',
+        'selector': '[expr259]',
         'itemName': 'syn',
         'indexName': null,
         'evaluate': function (scope) {
@@ -4157,8 +4157,8 @@ var _default = {
             }
           }]
         }]),
-        'redundantAttribute': 'expr71',
-        'selector': '[expr71]',
+        'redundantAttribute': 'expr260',
+        'selector': '[expr260]',
         'itemName': 'syn',
         'indexName': null,
         'evaluate': function (scope) {
@@ -4170,11 +4170,11 @@ var _default = {
       'evaluate': function (scope) {
         return scope.state.asking;
       },
-      'redundantAttribute': 'expr72',
-      'selector': '[expr72]',
-      'template': template('<form><input expr73 id="answerinput" type="text" autocomplete="off" placeholder="Answer"/><button expr74 class="button-primary">Enter</button></form>', [{
-        'redundantAttribute': 'expr73',
-        'selector': '[expr73]',
+      'redundantAttribute': 'expr261',
+      'selector': '[expr261]',
+      'template': template('<form><input expr262 id="answerinput" type="text" autocomplete="off" placeholder="Answer"/><button expr263 class="button-primary">Enter</button></form>', [{
+        'redundantAttribute': 'expr262',
+        'selector': '[expr262]',
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'oninput',
@@ -4183,8 +4183,8 @@ var _default = {
           }
         }]
       }, {
-        'redundantAttribute': 'expr74',
-        'selector': '[expr74]',
+        'redundantAttribute': 'expr263',
+        'selector': '[expr263]',
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onclick',
@@ -4198,11 +4198,26 @@ var _default = {
       'evaluate': function (scope) {
         return !scope.state.asking;
       },
-      'redundantAttribute': 'expr75',
-      'selector': '[expr75]',
-      'template': template('<button expr76 class="button">Edit card</button><button expr77 id="nextbutton" class="button-primary">Next</button>', [{
-        'redundantAttribute': 'expr76',
-        'selector': '[expr76]',
+      'redundantAttribute': 'expr264',
+      'selector': '[expr264]',
+      'template': template('<input expr265 type="text" disabled/><button expr266 class="button">Edit card</button><button expr267 id="nextbutton" class="button-primary">Next</button>', [{
+        'type': bindingTypes.IF,
+        'evaluate': function (scope) {
+          return !scope.state.asking;
+        },
+        'redundantAttribute': 'expr265',
+        'selector': '[expr265]',
+        'template': template(null, [{
+          'expressions': [{
+            'type': expressionTypes.VALUE,
+            'evaluate': function (scope) {
+              return scope.state.answerBox;
+            }
+          }]
+        }])
+      }, {
+        'redundantAttribute': 'expr266',
+        'selector': '[expr266]',
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onclick',
@@ -4211,8 +4226,8 @@ var _default = {
           }
         }]
       }, {
-        'redundantAttribute': 'expr77',
-        'selector': '[expr77]',
+        'redundantAttribute': 'expr267',
+        'selector': '[expr267]',
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onclick',
