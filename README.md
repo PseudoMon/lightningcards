@@ -14,7 +14,7 @@ This project is in version 1.0, which means it has all the functionalities that 
 - Easily create and edit your own cards.
 - Use UTF-8 and powered by Google Fonts: It should work with any language that your browser supports.
 - No backend whatsoever: Save the HTML/JS/CSS files and it'll work offline.
-- Deck you make is automatically saved locally
+- Decks you make is automatically saved locally
 - Switch between multiple decks. All decks are saved locally too.
 - Import/Export deck with JSON
 
