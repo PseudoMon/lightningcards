@@ -1,47 +1,74 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-/* Riot v4.3.5, @license MIT */
+/* Riot v4.11.1, @license MIT */
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
   (global = global || self, factory(global.riot = {}));
-}(this, function (exports) { 'use strict';
+}(this, (function (exports) { 'use strict';
 
-  const COMPONENTS_IMPLEMENTATION_MAP = new Map(),
-        DOM_COMPONENT_INSTANCE_PROPERTY = Symbol('riot-component'),
-        PLUGINS_SET = new Set(),
-        IS_DIRECTIVE = 'is',
-        VALUE_ATTRIBUTE = 'value',
-        ATTRIBUTES_KEY_SYMBOL = Symbol('attributes'),
-        TEMPLATE_KEY_SYMBOL = Symbol('template');
+  /**
+   * Convert a string from camel case to dash-case
+   * @param   {string} string - probably a component tag name
+   * @returns {string} component name normalized
+   */
 
-  var globals = /*#__PURE__*/Object.freeze({
-    COMPONENTS_IMPLEMENTATION_MAP: COMPONENTS_IMPLEMENTATION_MAP,
-    DOM_COMPONENT_INSTANCE_PROPERTY: DOM_COMPONENT_INSTANCE_PROPERTY,
-    PLUGINS_SET: PLUGINS_SET,
-    IS_DIRECTIVE: IS_DIRECTIVE,
-    VALUE_ATTRIBUTE: VALUE_ATTRIBUTE,
-    ATTRIBUTES_KEY_SYMBOL: ATTRIBUTES_KEY_SYMBOL,
-    TEMPLATE_KEY_SYMBOL: TEMPLATE_KEY_SYMBOL
-  });
+  /**
+   * Convert a string containing dashes to camel case
+   * @param   {string} string - input string
+   * @returns {string} my-string -> myString
+   */
+  function dashToCamelCase(string) {
+    return string.replace(/-(\w)/g, (_, c) => c.toUpperCase());
+  }
+  /**
+   * Move all the child nodes from a source tag to another
+   * @param   {HTMLElement} source - source node
+   * @param   {HTMLElement} target - target node
+   * @returns {undefined} it's a void method ¯\_(ツ)_/¯
+   */
+  // Ignore this helper because it's needed only for svg tags
 
+
+  function moveChildren(source, target) {
+    if (source.firstChild) {
+      target.appendChild(source.firstChild);
+      moveChildren(source, target);
+    }
+  }
   /**
    * Remove the child nodes from any DOM node
    * @param   {HTMLElement} node - target node
    * @returns {undefined}
    */
+
+
   function cleanNode(node) {
-    clearChildren(node, node.childNodes);
+    clearChildren(node.childNodes);
   }
   /**
    * Clear multiple children in a node
-   * @param   {HTMLElement} parent - parent node where the children will be removed
    * @param   {HTMLElement[]} children - direct children nodes
    * @returns {undefined}
    */
 
 
-  function clearChildren(parent, children) {
-    Array.from(children).forEach(n => parent.removeChild(n));
+  function clearChildren(children) {
+    Array.from(children).forEach(removeNode);
+  }
+  /**
+   * Remove a node from the DOM
+   * @param   {HTMLElement} node - target node
+   * @returns {undefined}
+   */
+
+
+  function removeNode(node) {
+    const {
+      parentNode
+    } = node;
+    if (node.remove) node.remove();
+    /* istanbul ignore else */
+    else if (parentNode) parentNode.removeChild(node);
   }
 
   const EACH = 0;
@@ -55,6 +82,16 @@
     SIMPLE,
     TAG,
     SLOT
+  };
+  const ATTRIBUTE = 0;
+  const EVENT = 1;
+  const TEXT = 2;
+  const VALUE = 3;
+  var expressionTypes = {
+    ATTRIBUTE,
+    EVENT,
+    TEXT,
+    VALUE
   };
   /**
    * Create the template meta object in case of <template> fragments
@@ -70,16 +107,28 @@
       children: Array.from(fragment.childNodes)
     };
   }
-  /* get rid of the @ungap/essential-map polyfill */
 
+  const {
+    indexOf: iOF
+  } = [];
 
   const append = (get, parent, children, start, end, before) => {
-    if (end - start < 2) parent.insertBefore(get(children[start], 1), before);else {
-      const fragment = parent.ownerDocument.createDocumentFragment();
+    const isSelect = ('selectedIndex' in parent);
+    let noSelection = isSelect;
 
-      while (start < end) fragment.appendChild(get(children[start++], 1));
+    while (start < end) {
+      const child = get(children[start], 1);
+      parent.insertBefore(child, before);
 
-      parent.insertBefore(fragment, before);
+      if (isSelect && noSelection && child.selected) {
+        noSelection = !noSelection;
+        let {
+          selectedIndex
+        } = parent;
+        parent.selectedIndex = selectedIndex < 0 ? start : iOF.call(parent.querySelectorAll('option'), child);
+      }
+
+      start++;
     }
   };
 
@@ -120,13 +169,8 @@
 
   const next = (get, list, i, length, before) => i < length ? get(list[i], 0) : 0 < i ? get(list[i - 1], -0).nextSibling : before;
 
-  const remove = (get, parent, children, start, end) => {
-    if (end - start < 2) parent.removeChild(get(children[start], -1));else {
-      const range = parent.ownerDocument.createRange();
-      range.setStartBefore(get(children[start], -1));
-      range.setEndAfter(get(children[end - 1], -1));
-      range.deleteContents();
-    }
+  const remove = (get, children, start, end) => {
+    while (start < end) drop(get(children[start++], -1));
   }; // - - - - - - - - - - - - - - - - - - -
   // diff related constants and utilities
   // - - - - - - - - - - - - - - - - - - -
@@ -148,14 +192,13 @@
 
     for (let i = 1; i < minLen; i++) tresh[i] = currentEnd;
 
-    const keymap = new Map();
-
-    for (let i = currentStart; i < currentEnd; i++) keymap.set(currentNodes[i], i);
+    const nodes = currentNodes.slice(currentStart, currentEnd);
 
     for (let i = futureStart; i < futureEnd; i++) {
-      const idxInOld = keymap.get(futureNodes[i]);
+      const index = nodes.indexOf(futureNodes[i]);
 
-      if (idxInOld != null) {
+      if (-1 < index) {
+        const idxInOld = index + currentStart;
         k = findK(tresh, minLen, idxInOld);
         /* istanbul ignore else */
 
@@ -286,7 +329,7 @@
   };
 
   const applyDiff = (diff, get, parentNode, futureNodes, futureStart, currentNodes, currentStart, currentLength, before) => {
-    const live = new Map();
+    const live = [];
     const length = diff.length;
     let currentIndex = currentStart;
     let i = 0;
@@ -300,7 +343,7 @@
 
         case INSERTION:
           // TODO: bulk appends for sequential nodes
-          live.set(futureNodes[futureStart], 1);
+          live.push(futureNodes[futureStart]);
           append(get, parentNode, futureNodes, futureStart++, futureStart, currentIndex < currentLength ? get(currentNodes[currentIndex], 0) : before);
           break;
 
@@ -320,7 +363,7 @@
 
         case DELETION:
           // TODO: bulk removes for sequential nodes
-          if (live.has(currentNodes[currentStart])) currentStart++;else remove(get, parentNode, currentNodes, currentStart++, currentStart);
+          if (-1 < live.indexOf(currentNodes[currentStart])) currentStart++;else remove(get, currentNodes, currentStart++, currentStart);
           break;
       }
     }
@@ -341,6 +384,17 @@
   const smartDiff = (get, parentNode, futureNodes, futureStart, futureEnd, futureChanges, currentNodes, currentStart, currentEnd, currentChanges, currentLength, compare, before) => {
     applyDiff(OND(futureNodes, futureStart, futureChanges, currentNodes, currentStart, currentChanges, compare) || HS(futureNodes, futureStart, futureEnd, futureChanges, currentNodes, currentStart, currentEnd, currentChanges), get, parentNode, futureNodes, futureStart, currentNodes, currentStart, currentLength, before);
   };
+
+  const drop = node => (node.remove || dropChild).call(node);
+
+  function dropChild() {
+    const {
+      parentNode
+    } = this;
+    /* istanbul ignore else */
+
+    if (parentNode) parentNode.removeChild(this);
+  }
   /*! (c) 2018 Andrea Giammarchi (ISC) */
 
 
@@ -385,7 +439,7 @@
 
 
     if (futureSame && currentStart < currentEnd) {
-      remove(get, parentNode, currentNodes, currentStart, currentEnd);
+      remove(get, currentNodes, currentStart, currentEnd);
       return futureNodes;
     }
 
@@ -407,8 +461,8 @@
         i = indexOf(currentNodes, currentStart, currentEnd, futureNodes, futureStart, futureEnd, compare); // outer diff
 
         if (-1 < i) {
-          remove(get, parentNode, currentNodes, currentStart, i);
-          remove(get, parentNode, currentNodes, i + futureChanges, currentEnd);
+          remove(get, currentNodes, currentStart, i);
+          remove(get, currentNodes, i + futureChanges, currentEnd);
           return futureNodes;
         }
       } // common case with one replacement for many nodes
@@ -419,7 +473,7 @@
 
     if (currentChanges < 2 || futureChanges < 2) {
       append(get, parentNode, futureNodes, futureStart, futureEnd, get(currentNodes[currentStart], 0));
-      remove(get, parentNode, currentNodes, currentStart, currentEnd);
+      remove(get, currentNodes, currentStart, currentEnd);
       return futureNodes;
     } // the half match diff part has been skipped in petit-dom
     // https://github.com/yelouafi/petit-dom/blob/bd6f5c919b5ae5297be01612c524c40be45f14a7/src/vdom.js#L391-L397
@@ -440,14 +494,26 @@
     return futureNodes;
   };
   /**
-   * Check if a value is null or undefined
-   * @param   {*}  value - anything
-   * @returns {boolean} true only for the 'undefined' and 'null' types
+   * Quick type checking
+   * @param   {*} element - anything
+   * @param   {string} type - type definition
+   * @returns {boolean} true if the type corresponds
    */
 
 
-  function isNil(value) {
-    return value == null;
+  function checkType(element, type) {
+    return typeof element === type;
+  }
+  /**
+   * Check if an element is part of an svg
+   * @param   {HTMLElement}  el - element to check
+   * @returns {boolean} true if we are in an svg context
+   */
+
+
+  function isSvg(el) {
+    const owner = el.ownerSVGElement;
+    return !!owner || owner === null;
   }
   /**
    * Check if an element is a template tag
@@ -459,23 +525,64 @@
   function isTemplate(el) {
     return !isNil(el.content);
   }
+  /**
+   * Check that will be passed if its argument is a function
+   * @param   {*} value - value to check
+   * @returns {boolean} - true if the value is a function
+   */
 
+
+  function isFunction(value) {
+    return checkType(value, 'function');
+  }
+  /**
+   * Check if a value is a Boolean
+   * @param   {*}  value - anything
+   * @returns {boolean} true only for the value is a boolean
+   */
+
+
+  function isBoolean(value) {
+    return checkType(value, 'boolean');
+  }
+  /**
+   * Check if a value is an Object
+   * @param   {*}  value - anything
+   * @returns {boolean} true only for the value is an object
+   */
+
+
+  function isObject(value) {
+    return !isNil(value) && checkType(value, 'object');
+  }
+  /**
+   * Check if a value is null or undefined
+   * @param   {*}  value - anything
+   * @returns {boolean} true only for the 'undefined' and 'null' types
+   */
+
+
+  function isNil(value) {
+    return value === null || value === undefined;
+  }
+
+  const UNMOUNT_SCOPE = Symbol('unmount');
   const EachBinding = Object.seal({
     // dynamic binding properties
-    childrenMap: null,
-    node: null,
-    root: null,
-    condition: null,
-    evaluate: null,
-    template: null,
-    isTemplateTag: false,
+    // childrenMap: null,
+    // node: null,
+    // root: null,
+    // condition: null,
+    // evaluate: null,
+    // template: null,
+    // isTemplateTag: false,
     nodes: [],
-    getKey: null,
-    indexName: null,
-    itemName: null,
-    afterPlaceholder: null,
-    placeholder: null,
 
+    // getKey: null,
+    // indexName: null,
+    // itemName: null,
+    // afterPlaceholder: null,
+    // placeholder: null,
     // API methods
     mount(scope, parentScope) {
       return this.update(scope, parentScope);
@@ -483,9 +590,11 @@
 
     update(scope, parentScope) {
       const {
-        placeholder
+        placeholder,
+        nodes,
+        childrenMap
       } = this;
-      const collection = this.evaluate(scope);
+      const collection = scope === UNMOUNT_SCOPE ? null : this.evaluate(scope);
       const items = collection ? Array.from(collection) : [];
       const parent = placeholder.parentNode; // prepare the diffing
 
@@ -495,16 +604,10 @@
         futureNodes
       } = createPatch(items, scope, parentScope, this); // patch the DOM only if there are new nodes
 
-      if (futureNodes.length) {
-        domdiff(parent, this.nodes, futureNodes, {
-          before: placeholder,
-          node: patch(Array.from(this.childrenMap.values()), parentScope)
-        });
-      } else {
-        // remove all redundant templates
-        unmountRedundant(this.childrenMap);
-      } // trigger the mounts and the updates
-
+      domdiff(parent, nodes, futureNodes, {
+        before: placeholder,
+        node: patch(Array.from(childrenMap.values()), parentScope)
+      }); // trigger the mounts and the updates
 
       batches.forEach(fn => fn()); // update the children map
 
@@ -514,9 +617,7 @@
     },
 
     unmount(scope, parentScope) {
-      unmountRedundant(this.childrenMap, parentScope);
-      this.childrenMap = new Map();
-      this.nodes = [];
+      this.update(UNMOUNT_SCOPE, parentScope);
       return this;
     }
 
@@ -531,34 +632,21 @@
   function patch(redundant, parentScope) {
     return (item, info) => {
       if (info < 0) {
-        const {
-          template,
-          context
-        } = redundant.pop(); // notice that we pass null as last argument because
-        // the root node and its children will be removed by domdiff
+        const element = redundant.pop();
 
-        template.unmount(context, parentScope, null);
+        if (element) {
+          const {
+            template,
+            context
+          } = element; // notice that we pass null as last argument because
+          // the root node and its children will be removed by domdiff
+
+          template.unmount(context, parentScope, null);
+        }
       }
 
       return item;
     };
-  }
-  /**
-   * Unmount the remaining template instances
-   * @param   {Map} childrenMap - map containing the children template to unmount
-   * @param   {*} parentScope - scope of the parent template
-   * @returns {TemplateChunk[]} collection containing the template chunks unmounted
-   */
-
-
-  function unmountRedundant(childrenMap, parentScope) {
-    return Array.from(childrenMap.values()).map((_ref) => {
-      let {
-        template,
-        context
-      } = _ref;
-      return template.unmount(context, parentScope, true);
-    });
   }
   /**
    * Check whether a template must be filtered from a loop
@@ -582,13 +670,13 @@
    */
 
 
-  function extendScope(scope, _ref2) {
+  function extendScope(scope, _ref) {
     let {
       itemName,
       indexName,
       index,
       item
-    } = _ref2;
+    } = _ref;
     scope[itemName] = item;
     if (indexName) scope[indexName] = index;
     return scope;
@@ -642,13 +730,14 @@
       if (mustMount) {
         batches.push(() => componentTemplate.mount(el, context, parentScope, meta));
       } else {
-        componentTemplate.update(context, parentScope);
+        batches.push(() => componentTemplate.update(context, parentScope));
       } // create the collection of nodes to update or to add
       // in case of template tags we need to add all its children nodes
 
 
       if (isTemplateTag) {
-        futureNodes.push(...(meta.children || componentTemplate.children));
+        const children = meta.children || componentTemplate.children;
+        futureNodes.push(...children);
       } else {
         futureNodes.push(el);
       } // delete the old item from the children map
@@ -669,7 +758,7 @@
     };
   }
 
-  function create(node, _ref3) {
+  function create(node, _ref2) {
     let {
       evaluate,
       condition,
@@ -677,12 +766,12 @@
       indexName,
       getKey,
       template
-    } = _ref3;
+    } = _ref2;
     const placeholder = document.createTextNode('');
     const parent = node.parentNode;
     const root = node.cloneNode();
     parent.insertBefore(placeholder, node);
-    parent.removeChild(node);
+    removeNode(node);
     return Object.assign({}, EachBinding, {
       childrenMap: new Map(),
       node,
@@ -704,17 +793,13 @@
 
   const IfBinding = Object.seal({
     // dynamic binding properties
-    node: null,
-    evaluate: null,
-    parent: null,
-    isTemplateTag: false,
-    placeholder: null,
-    template: null,
-
+    // node: null,
+    // evaluate: null,
+    // isTemplateTag: false,
+    // placeholder: null,
+    // template: null,
     // API methods
     mount(scope, parentScope) {
-      this.parent.insertBefore(this.placeholder, this.node);
-      this.parent.removeChild(this.node);
       return this.update(scope, parentScope);
     },
 
@@ -723,11 +808,16 @@
       const mustMount = !this.value && value;
       const mustUnmount = this.value && !value;
 
+      const mount = () => {
+        const pristine = this.node.cloneNode();
+        this.placeholder.parentNode.insertBefore(pristine, this.placeholder);
+        this.template = this.template.clone();
+        this.template.mount(pristine, scope, parentScope);
+      };
+
       switch (true) {
         case mustMount:
-          this.parent.insertBefore(this.node, this.placeholder);
-          this.template = this.template.clone();
-          this.template.mount(this.node, scope, parentScope);
+          mount();
           break;
 
         case mustUnmount:
@@ -743,38 +833,84 @@
     },
 
     unmount(scope, parentScope) {
-      this.template.unmount(scope, parentScope);
+      this.template.unmount(scope, parentScope, true);
       return this;
     }
 
   });
 
-  function create$1(node, _ref4) {
+  function create$1(node, _ref3) {
     let {
       evaluate,
       template
-    } = _ref4;
+    } = _ref3;
+    const parent = node.parentNode;
+    const placeholder = document.createTextNode('');
+    parent.insertBefore(placeholder, node);
+    removeNode(node);
     return Object.assign({}, IfBinding, {
       node,
       evaluate,
-      parent: node.parentNode,
-      placeholder: document.createTextNode(''),
+      placeholder,
       template: template.createDOM(node)
     });
   }
+  /**
+   * Returns the memoized (cached) function.
+   * // borrowed from https://www.30secondsofcode.org/js/s/memoize
+   * @param {Function} fn - function to memoize
+   * @returns {Function} memoize function
+   */
 
-  const ATTRIBUTE = 0;
-  const EVENT = 1;
-  const TEXT = 2;
-  const VALUE = 3;
-  var expressionTypes = {
-    ATTRIBUTE,
-    EVENT,
-    TEXT,
-    VALUE
-  };
+
+  function memoize(fn) {
+    const cache = new Map();
+
+    const cached = val => {
+      return cache.has(val) ? cache.get(val) : cache.set(val, fn.call(this, val)) && cache.get(val);
+    };
+
+    cached.cache = cache;
+    return cached;
+  }
+  /**
+   * Evaluate a list of attribute expressions
+   * @param   {Array} attributes - attribute expressions generated by the riot compiler
+   * @returns {Object} key value pairs with the result of the computation
+   */
+
+
+  function evaluateAttributeExpressions(attributes) {
+    return attributes.reduce((acc, attribute) => {
+      const {
+        value,
+        type
+      } = attribute;
+
+      switch (true) {
+        // spread attribute
+        case !attribute.name && type === ATTRIBUTE:
+          return Object.assign({}, acc, {}, value);
+        // value attribute
+
+        case type === VALUE:
+          acc.value = attribute.value;
+          break;
+        // normal attributes
+
+        default:
+          acc[dashToCamelCase(attribute.name)] = attribute.value;
+      }
+
+      return acc;
+    }, {});
+  }
+
   const REMOVE_ATTRIBUTE = 'removeAttribute';
   const SET_ATTIBUTE = 'setAttribute';
+  const ElementProto = typeof Element === 'undefined' ? {} : Element.prototype;
+  const isNativeHtmlProperty = memoize(name => ElementProto.hasOwnProperty(name)); // eslint-disable-line
+
   /**
    * Add all the attributes provided
    * @param   {HTMLElement} node - target node
@@ -783,8 +919,8 @@
    */
 
   function setAllAttributes(node, attributes) {
-    Object.entries(attributes).forEach((_ref5) => {
-      let [name, value] = _ref5;
+    Object.entries(attributes).forEach((_ref4) => {
+      let [name, value] = _ref4;
       return attributeExpression(node, {
         name
       }, value);
@@ -793,13 +929,15 @@
   /**
    * Remove all the attributes provided
    * @param   {HTMLElement} node - target node
-   * @param   {Object} attributes - object containing all the attribute names
+   * @param   {Object} newAttributes - object containing all the new attribute names
+   * @param   {Object} oldAttributes - object containing all the old attribute names
    * @returns {undefined} sorry it's a void function :(
    */
 
 
-  function removeAllAttributes(node, attributes) {
-    Object.keys(attributes).forEach(attribute => node.removeAttribute(attribute));
+  function removeAllAttributes(node, newAttributes, oldAttributes) {
+    const newKeys = newAttributes ? Object.keys(newAttributes) : [];
+    Object.keys(oldAttributes).filter(name => !newKeys.includes(name)).forEach(attribute => node.removeAttribute(attribute));
   }
   /**
    * This methods handles the DOM attributes updates
@@ -812,26 +950,28 @@
    */
 
 
-  function attributeExpression(node, _ref6, value, oldValue) {
+  function attributeExpression(node, _ref5, value, oldValue) {
     let {
       name
-    } = _ref6;
+    } = _ref5;
 
     // is it a spread operator? {...attributes}
     if (!name) {
-      // is the value still truthy?
+      if (oldValue) {
+        // remove all the old attributes
+        removeAllAttributes(node, value, oldValue);
+      } // is the value still truthy?
+
+
       if (value) {
         setAllAttributes(node, value);
-      } else if (oldValue) {
-        // otherwise remove all the old attributes
-        removeAllAttributes(node, oldValue);
       }
 
       return;
     } // handle boolean attributes
 
 
-    if (typeof value === 'boolean') {
+    if (!isNativeHtmlProperty(name) && (isBoolean(value) || isObject(value) || isFunction(value))) {
       node[name] = value;
     }
 
@@ -845,7 +985,7 @@
 
 
   function getMethod(value) {
-    return isNil(value) || value === false || value === '' || typeof value === 'object' ? REMOVE_ATTRIBUTE : SET_ATTIBUTE;
+    return isNil(value) || value === false || value === '' || isObject(value) || isFunction(value) ? REMOVE_ATTRIBUTE : SET_ATTIBUTE;
   }
   /**
    * Get the value as string
@@ -860,44 +1000,33 @@
     if (value === true) return name;
     return value;
   }
+
+  const RE_EVENTS_PREFIX = /^on/;
+
+  const getCallbackAndOptions = value => Array.isArray(value) ? value : [value, false];
   /**
    * Set a new event listener
    * @param   {HTMLElement} node - target node
    * @param   {Object} expression - expression object
    * @param   {string} expression.name - event name
    * @param   {*} value - new expression value
-   * @returns {undefined}
+   * @param   {*} oldValue - old expression value
+   * @returns {value} the callback just received
    */
 
 
-  function eventExpression(node, _ref7, value) {
+  function eventExpression(node, _ref6, value, oldValue) {
     let {
       name
-    } = _ref7;
-    node[name] = value;
-  }
-  /**
-   * This methods handles a simple text expression update
-   * @param   {HTMLElement} node - target node
-   * @param   {Object} expression - expression object
-   * @param   {number} expression.childNodeIndex - index to find the text node to update
-   * @param   {*} value - new expression value
-   * @returns {undefined}
-   */
+    } = _ref6;
+    const normalizedEventName = name.replace(RE_EVENTS_PREFIX, '');
 
+    if (oldValue) {
+      node.removeEventListener(normalizedEventName, ...getCallbackAndOptions(oldValue));
+    }
 
-  function textExpression(node, _ref8, value) {
-    let {
-      childNodeIndex
-    } = _ref8;
-    const target = node.childNodes[childNodeIndex];
-    const val = normalizeValue$1(value); // replace the target if it's a placeholder comment
-
-    if (target.nodeType === Node.COMMENT_NODE) {
-      const textNode = document.createTextNode(val);
-      node.replaceChild(textNode, target);
-    } else {
-      target.data = normalizeValue$1(val);
+    if (value) {
+      node.addEventListener(normalizedEventName, ...getCallbackAndOptions(value));
     }
   }
   /**
@@ -907,8 +1036,39 @@
    */
 
 
-  function normalizeValue$1(value) {
-    return value != null ? value : '';
+  function normalizeStringValue(value) {
+    return isNil(value) ? '' : value;
+  }
+  /**
+   * Get the the target text node to update or create one from of a comment node
+   * @param   {HTMLElement} node - any html element containing childNodes
+   * @param   {number} childNodeIndex - index of the text node in the childNodes list
+   * @returns {HTMLTextNode} the text node to update
+   */
+
+
+  const getTextNode = (node, childNodeIndex) => {
+    const target = node.childNodes[childNodeIndex];
+
+    if (target.nodeType === Node.COMMENT_NODE) {
+      const textNode = document.createTextNode('');
+      node.replaceChild(textNode, target);
+      return textNode;
+    }
+
+    return target;
+  };
+  /**
+   * This methods handles a simple text expression update
+   * @param   {HTMLElement} node - target node
+   * @param   {Object} data - expression object
+   * @param   {*} value - new expression value
+   * @returns {undefined}
+   */
+
+
+  function textExpression(node, data, value) {
+    node.data = normalizeStringValue(value);
   }
   /**
    * This methods handles the input fileds value updates
@@ -920,7 +1080,7 @@
 
 
   function valueExpression(node, expression, value) {
-    node.value = value;
+    node.value = normalizeStringValue(value);
   }
 
   var expressions = {
@@ -931,9 +1091,8 @@
   };
   const Expression = Object.seal({
     // Static props
-    node: null,
-    value: null,
-
+    // node: null,
+    // value: null,
     // API methods
 
     /**
@@ -972,6 +1131,8 @@
      * @returns {Expression} self
      */
     unmount() {
+      // unmount only the event handling expressions
+      if (this.type === EVENT) apply(this, null);
       return this;
     }
 
@@ -989,7 +1150,7 @@
 
   function create$2(node, data) {
     return Object.assign({}, Expression, {}, data, {
-      node
+      node: data.type === TEXT ? getTextNode(node, data.childNodeIndex) : node
     });
   }
   /**
@@ -1012,25 +1173,38 @@
     }, {});
   }
 
-  function create$3(node, _ref9) {
+  function create$3(node, _ref7) {
     let {
       expressions
-    } = _ref9;
+    } = _ref7;
     return Object.assign({}, flattenCollectionMethods(expressions.map(expression => create$2(node, expression)), ['mount', 'update', 'unmount']));
+  }
+
+  function extendParentScope(attributes, scope, parentScope) {
+    if (!attributes || !attributes.length) return parentScope;
+    const expressions = attributes.map(attr => Object.assign({}, attr, {
+      value: attr.evaluate(scope)
+    }));
+    return Object.assign(Object.create(parentScope || null), evaluateAttributeExpressions(expressions));
   }
 
   const SlotBinding = Object.seal({
     // dynamic binding properties
-    node: null,
-    name: null,
-    template: null,
+    // node: null,
+    // name: null,
+    attributes: [],
+
+    // template: null,
+    getTemplateScope(scope, parentScope) {
+      return extendParentScope(this.attributes, scope, parentScope);
+    },
 
     // API methods
     mount(scope, parentScope) {
-      const templateData = scope.slots ? scope.slots.find((_ref10) => {
+      const templateData = scope.slots ? scope.slots.find((_ref8) => {
         let {
           id
-        } = _ref10;
+        } = _ref8;
         return id === this.name;
       }) : false;
       const {
@@ -1039,17 +1213,17 @@
       this.template = templateData && create$6(templateData.html, templateData.bindings).createDOM(parentNode);
 
       if (this.template) {
-        this.template.mount(this.node, parentScope);
-        moveSlotInnerContent(this.node);
+        this.template.mount(this.node, this.getTemplateScope(scope, parentScope));
+        this.template.children = moveSlotInnerContent(this.node);
       }
 
-      parentNode.removeChild(this.node);
+      removeNode(this.node);
       return this;
     },
 
     update(scope, parentScope) {
-      if (this.template && parentScope) {
-        this.template.update(parentScope);
+      if (this.template) {
+        this.template.update(this.getTemplateScope(scope, parentScope));
       }
 
       return this;
@@ -1057,7 +1231,7 @@
 
     unmount(scope, parentScope, mustRemoveRoot) {
       if (this.template) {
-        this.template.unmount(parentScope, null, mustRemoveRoot);
+        this.template.unmount(this.getTemplateScope(scope, parentScope), null, mustRemoveRoot);
       }
 
       return this;
@@ -1067,14 +1241,23 @@
   /**
    * Move the inner content of the slots outside of them
    * @param   {HTMLNode} slot - slot node
-   * @returns {undefined} it's a void function
+   * @param   {HTMLElement} children - array to fill with the child nodes detected
+   * @returns {HTMLElement[]} list of the node moved
    */
 
-  function moveSlotInnerContent(slot) {
-    if (slot.firstChild) {
-      slot.parentNode.insertBefore(slot.firstChild, slot);
-      moveSlotInnerContent(slot);
+  function moveSlotInnerContent(slot, children) {
+    if (children === void 0) {
+      children = [];
     }
+
+    const child = slot.firstChild;
+
+    if (child) {
+      slot.parentNode.insertBefore(child, slot);
+      return [child, ...moveSlotInnerContent(slot)];
+    }
+
+    return children;
   }
   /**
    * Create a single slot binding
@@ -1084,11 +1267,13 @@
    */
 
 
-  function createSlot(node, _ref11) {
+  function createSlot(node, _ref9) {
     let {
-      name
-    } = _ref11;
+      name,
+      attributes
+    } = _ref9;
     return Object.assign({}, SlotBinding, {
+      attributes,
       node,
       name
     });
@@ -1139,10 +1324,10 @@
 
 
   function slotBindings(slots) {
-    return slots.reduce((acc, _ref12) => {
+    return slots.reduce((acc, _ref10) => {
       let {
         bindings
-      } = _ref12;
+      } = _ref10;
       return acc.concat(bindings);
     }, []);
   }
@@ -1161,14 +1346,13 @@
 
   const TagBinding = Object.seal({
     // dynamic binding properties
-    node: null,
-    evaluate: null,
-    name: null,
-    slots: null,
-    tag: null,
-    attributes: null,
-    getComponent: null,
-
+    // node: null,
+    // evaluate: null,
+    // name: null,
+    // slots: null,
+    // tag: null,
+    // attributes: null,
+    // getComponent: null,
     mount(scope) {
       return this.update(scope);
     },
@@ -1201,13 +1385,13 @@
 
   });
 
-  function create$4(node, _ref13) {
+  function create$4(node, _ref11) {
     let {
       evaluate,
       getComponent,
       slots,
       attributes
-    } = _ref13;
+    } = _ref11;
     return Object.assign({}, TagBinding, {
       node,
       evaluate,
@@ -1225,13 +1409,28 @@
     [SLOT]: createSlot
   };
   /**
+   * Text expressions in a template tag will get childNodeIndex value normalized
+   * depending on the position of the <template> tag offset
+   * @param   {Expression[]} expressions - riot expressions array
+   * @param   {number} textExpressionsOffset - offset of the <template> tag
+   * @returns {Expression[]} expressions containing the text expressions normalized
+   */
+
+  function fixTextExpressionsOffset(expressions, textExpressionsOffset) {
+    return expressions.map(e => e.type === TEXT ? Object.assign({}, e, {
+      childNodeIndex: e.childNodeIndex + textExpressionsOffset
+    }) : e);
+  }
+  /**
    * Bind a new expression object to a DOM node
    * @param   {HTMLElement} root - DOM node where to bind the expression
    * @param   {Object} binding - binding data
-   * @returns {Expression} Expression object
+   * @param   {number|null} templateTagOffset - if it's defined we need to fix the text expressions childNodeIndex offset
+   * @returns {Binding} Binding object
    */
 
-  function create$5(root, binding) {
+
+  function create$5(root, binding, templateTagOffset) {
     const {
       selector,
       type,
@@ -1241,22 +1440,12 @@
 
     const node = selector ? root.querySelector(selector) : root; // remove eventually additional attributes created only to select this node
 
-    if (redundantAttribute) node.removeAttribute(redundantAttribute); // init the binding
+    if (redundantAttribute) node.removeAttribute(redundantAttribute);
+    const bindingExpressions = expressions || []; // init the binding
 
     return (bindings[type] || bindings[SIMPLE])(node, Object.assign({}, binding, {
-      expressions: expressions || []
+      expressions: templateTagOffset && !selector ? fixTextExpressionsOffset(bindingExpressions, templateTagOffset) : bindingExpressions
     }));
-  }
-  /**
-   * Check if an element is part of an svg
-   * @param   {HTMLElement}  el - element to check
-   * @returns {boolean} true if we are in an svg context
-   */
-
-
-  function isSvg(el) {
-    const owner = el.ownerSVGElement;
-    return !!owner || owner === null;
   } // in this case a simple innerHTML is enough
 
 
@@ -1267,7 +1456,7 @@
   } // for svg nodes we need a bit more work
 
 
-  function creteSVGTree(html, container) {
+  function createSVGTree(html, container) {
     // create the SVGNode
     const svgNode = container.ownerDocument.importNode(new window.DOMParser().parseFromString(`<svg xmlns="http://www.w3.org/2000/svg">${html}</svg>`, 'application/xml').documentElement, true);
     return svgNode;
@@ -1281,25 +1470,8 @@
 
 
   function createDOMTree(root, html) {
-    if (isSvg(root)) return creteSVGTree(html, root);
+    if (isSvg(root)) return createSVGTree(html, root);
     return createHTMLTree(html, root);
-  }
-  /**
-   * Move all the child nodes from a source tag to another
-   * @param   {HTMLElement} source - source node
-   * @param   {HTMLElement} target - target node
-   * @returns {undefined} it's a void method ¯\_(ツ)_/¯
-   */
-  // Ignore this helper because it's needed only for svg tags
-
-  /* istanbul ignore next */
-
-
-  function moveChildren(source, target) {
-    if (source.firstChild) {
-      target.appendChild(source.firstChild);
-      moveChildren(source, target);
-    }
   }
   /**
    * Inject the DOM tree into a target node
@@ -1342,14 +1514,14 @@
 
   const TemplateChunk = Object.freeze({
     // Static props
-    bindings: null,
-    bindingsData: null,
-    html: null,
-    isTemplateTag: false,
-    fragment: null,
-    children: null,
-    dom: null,
-    el: null,
+    // bindings: null,
+    // bindingsData: null,
+    // html: null,
+    // isTemplateTag: false,
+    // fragment: null,
+    // children: null,
+    // dom: null,
+    // el: null,
 
     /**
      * Create the template DOM structure that will be cloned on each mount
@@ -1391,7 +1563,9 @@
       const {
         parentNode
       } = children ? children[0] : el;
-      this.isTemplateTag = isTemplate(el); // create the DOM if it wasn't created before
+      const isTemplateTag = isTemplate(el);
+      const templateTagOffset = isTemplateTag ? Math.max(Array.from(parentNode.childNodes).indexOf(el), 0) : null;
+      this.isTemplateTag = isTemplateTag; // create the DOM if it wasn't created before
 
       this.createDOM(el);
 
@@ -1408,7 +1582,7 @@
 
       if (!avoidDOMInjection && this.fragment) injectDOM(el, this.fragment); // create the bindings
 
-      this.bindings = this.bindingsData.map(binding => create$5(this.el, binding));
+      this.bindings = this.bindingsData.map(binding => create$5(this.el, binding, templateTagOffset));
       this.bindings.forEach(b => b.mount(scope, parentScope));
       return this;
     },
@@ -1436,14 +1610,23 @@
       if (this.el) {
         this.bindings.forEach(b => b.unmount(scope, parentScope, mustRemoveRoot));
 
-        if (mustRemoveRoot && this.el.parentNode) {
-          this.el.parentNode.removeChild(this.el);
-        } else if (mustRemoveRoot !== null) {
-          if (this.children) {
-            clearChildren(this.children[0].parentNode, this.children);
-          } else {
+        switch (true) {
+          // <template> tags should be treated a bit differently
+          // we need to clear their children only if it's explicitly required by the caller
+          // via mustRemoveRoot !== null
+          case this.children && mustRemoveRoot !== null:
+            clearChildren(this.children);
+            break;
+          // remove the root node only if the mustRemoveRoot === true
+
+          case mustRemoveRoot === true:
+            removeNode(this.el);
+            break;
+          // otherwise we clean the node children
+
+          case mustRemoveRoot !== null:
             cleanNode(this.el);
-          }
+            break;
         }
 
         this.el = null;
@@ -1481,13 +1664,73 @@
     });
   }
 
+  var DOMBindings = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    bindingTypes: bindingTypes,
+    createBinding: create$5,
+    createExpression: create$2,
+    expressionTypes: expressionTypes,
+    template: create$6
+  });
+
+  const COMPONENTS_IMPLEMENTATION_MAP = new Map(),
+        DOM_COMPONENT_INSTANCE_PROPERTY = Symbol('riot-component'),
+        PLUGINS_SET = new Set(),
+        IS_DIRECTIVE = 'is',
+        VALUE_ATTRIBUTE = 'value',
+        MOUNT_METHOD_KEY = 'mount',
+        UPDATE_METHOD_KEY = 'update',
+        UNMOUNT_METHOD_KEY = 'unmount',
+        SHOULD_UPDATE_KEY = 'shouldUpdate',
+        ON_BEFORE_MOUNT_KEY = 'onBeforeMount',
+        ON_MOUNTED_KEY = 'onMounted',
+        ON_BEFORE_UPDATE_KEY = 'onBeforeUpdate',
+        ON_UPDATED_KEY = 'onUpdated',
+        ON_BEFORE_UNMOUNT_KEY = 'onBeforeUnmount',
+        ON_UNMOUNTED_KEY = 'onUnmounted',
+        PROPS_KEY = 'props',
+        STATE_KEY = 'state',
+        SLOTS_KEY = 'slots',
+        ROOT_KEY = 'root',
+        IS_PURE_SYMBOL = Symbol.for('pure'),
+        PARENT_KEY_SYMBOL = Symbol('parent'),
+        ATTRIBUTES_KEY_SYMBOL = Symbol('attributes'),
+        TEMPLATE_KEY_SYMBOL = Symbol('template');
+
+  var globals = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    COMPONENTS_IMPLEMENTATION_MAP: COMPONENTS_IMPLEMENTATION_MAP,
+    DOM_COMPONENT_INSTANCE_PROPERTY: DOM_COMPONENT_INSTANCE_PROPERTY,
+    PLUGINS_SET: PLUGINS_SET,
+    IS_DIRECTIVE: IS_DIRECTIVE,
+    VALUE_ATTRIBUTE: VALUE_ATTRIBUTE,
+    MOUNT_METHOD_KEY: MOUNT_METHOD_KEY,
+    UPDATE_METHOD_KEY: UPDATE_METHOD_KEY,
+    UNMOUNT_METHOD_KEY: UNMOUNT_METHOD_KEY,
+    SHOULD_UPDATE_KEY: SHOULD_UPDATE_KEY,
+    ON_BEFORE_MOUNT_KEY: ON_BEFORE_MOUNT_KEY,
+    ON_MOUNTED_KEY: ON_MOUNTED_KEY,
+    ON_BEFORE_UPDATE_KEY: ON_BEFORE_UPDATE_KEY,
+    ON_UPDATED_KEY: ON_UPDATED_KEY,
+    ON_BEFORE_UNMOUNT_KEY: ON_BEFORE_UNMOUNT_KEY,
+    ON_UNMOUNTED_KEY: ON_UNMOUNTED_KEY,
+    PROPS_KEY: PROPS_KEY,
+    STATE_KEY: STATE_KEY,
+    SLOTS_KEY: SLOTS_KEY,
+    ROOT_KEY: ROOT_KEY,
+    IS_PURE_SYMBOL: IS_PURE_SYMBOL,
+    PARENT_KEY_SYMBOL: PARENT_KEY_SYMBOL,
+    ATTRIBUTES_KEY_SYMBOL: ATTRIBUTES_KEY_SYMBOL,
+    TEMPLATE_KEY_SYMBOL: TEMPLATE_KEY_SYMBOL
+  });
+
   /**
    * Quick type checking
    * @param   {*} element - anything
    * @param   {string} type - type definition
    * @returns {boolean} true if the type corresponds
    */
-  function checkType(element, type) {
+  function checkType$1(element, type) {
     return typeof element === type;
   }
   /**
@@ -1496,61 +1739,9 @@
    * @returns {boolean} - true if the value is a function
    */
 
-  function isFunction(value) {
-    return checkType(value, 'function');
+  function isFunction$1(value) {
+    return checkType$1(value, 'function');
   }
-
-  /* eslint-disable fp/no-mutating-methods */
-  /**
-   * Throw an error
-   * @param {string} error - error message
-   * @returns {undefined} it's a IO void function
-   */
-
-  function panic(error) {
-    throw new Error(error);
-  }
-  /**
-   * Call the first argument received only if it's a function otherwise return it as it is
-   * @param   {*} source - anything
-   * @returns {*} anything
-   */
-
-  function callOrAssign(source) {
-    return isFunction(source) ? source.prototype && source.prototype.constructor ? new source() : source() : source;
-  }
-  /**
-   * Convert a string from camel case to dash-case
-   * @param   {string} string - probably a component tag name
-   * @returns {string} component name normalized
-   */
-
-  function camelToDashCase(string) {
-    return string.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
-  }
-  /**
-   * Convert a string containing dashes to camel case
-   * @param   {string} string - input string
-   * @returns {string} my-string -> myString
-   */
-
-  function dashToCamelCase(string) {
-    return string.replace(/-(\w)/g, (_, c) => c.toUpperCase());
-  }
-  /**
-   * Define default properties if they don't exist on the source object
-   * @param   {Object} source - object that will receive the default properties
-   * @param   {Object} defaults - object containing additional optional keys
-   * @returns {Object} the original object received enhanced
-   */
-
-  function defineDefaults(source, defaults) {
-    Object.entries(defaults).forEach((_ref) => {
-      let [key, value] = _ref;
-      if (!source[key]) source[key] = value;
-    });
-    return source;
-  } // doese simply nothing
 
   function noop() {
     return this;
@@ -1569,6 +1760,16 @@
     return source;
   }
   /**
+   * Call the first argument received only if it's a function otherwise return it as it is
+   * @param   {*} source - anything
+   * @returns {*} anything
+   */
+
+  function callOrAssign(source) {
+    return isFunction$1(source) ? source.prototype && source.prototype.constructor ? new source() : source() : source;
+  }
+
+  /**
    * Helper function to set an immutable property
    * @param   {Object} source - object where the new property will be set
    * @param   {string} key - object key where the new property will be stored
@@ -1576,18 +1777,20 @@
    * @param   {Object} options - set the propery overriding the default options
    * @returns {Object} - the original object modified
    */
-
   function defineProperty(source, key, value, options) {
     if (options === void 0) {
       options = {};
     }
 
+    /* eslint-disable fp/no-mutating-methods */
     Object.defineProperty(source, key, Object.assign({
       value,
       enumerable: false,
       writable: false,
       configurable: true
     }, options));
+    /* eslint-enable fp/no-mutating-methods */
+
     return source;
   }
   /**
@@ -1599,11 +1802,56 @@
    */
 
   function defineProperties(source, properties, options) {
-    Object.entries(properties).forEach((_ref2) => {
-      let [key, value] = _ref2;
+    Object.entries(properties).forEach((_ref) => {
+      let [key, value] = _ref;
       defineProperty(source, key, value, options);
     });
     return source;
+  }
+  /**
+   * Define default properties if they don't exist on the source object
+   * @param   {Object} source - object that will receive the default properties
+   * @param   {Object} defaults - object containing additional optional keys
+   * @returns {Object} the original object received enhanced
+   */
+
+  function defineDefaults(source, defaults) {
+    Object.entries(defaults).forEach((_ref2) => {
+      let [key, value] = _ref2;
+      if (!source[key]) source[key] = value;
+    });
+    return source;
+  }
+
+  const ATTRIBUTE$1 = 0;
+  const VALUE$1 = 3;
+
+  /**
+   * Convert a string from camel case to dash-case
+   * @param   {string} string - probably a component tag name
+   * @returns {string} component name normalized
+   */
+  function camelToDashCase(string) {
+    return string.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+  }
+  /**
+   * Convert a string containing dashes to camel case
+   * @param   {string} string - input string
+   * @returns {string} my-string -> myString
+   */
+
+  function dashToCamelCase$1(string) {
+    return string.replace(/-(\w)/g, (_, c) => c.toUpperCase());
+  }
+
+  /**
+   * Throw an error with a descriptive message
+   * @param   { string } message - error message
+   * @returns { undefined } hoppla.. at this point the program should stop working
+   */
+
+  function panic(message) {
+    throw new Error(message);
   }
   /**
    * Evaluate a list of attribute expressions
@@ -1611,7 +1859,7 @@
    * @returns {Object} key value pairs with the result of the computation
    */
 
-  function evaluateAttributeExpressions(attributes) {
+  function evaluateAttributeExpressions$1(attributes) {
     return attributes.reduce((acc, attribute) => {
       const {
         value,
@@ -1620,17 +1868,17 @@
 
       switch (true) {
         // spread attribute
-        case !attribute.name && type === expressionTypes.ATTRIBUTE:
+        case !attribute.name && type === ATTRIBUTE$1:
           return Object.assign({}, acc, {}, value);
         // value attribute
 
-        case type === expressionTypes.VALUE:
-          acc[VALUE_ATTRIBUTE] = attribute.value;
+        case type === VALUE$1:
+          acc.value = attribute.value;
           break;
         // normal attributes
 
         default:
-          acc[dashToCamelCase(attribute.name)] = attribute.value;
+          acc[dashToCamelCase$1(attribute.name)] = attribute.value;
       }
 
       return acc;
@@ -1653,6 +1901,30 @@
 
 
     return els;
+  }
+
+  /**
+   * Simple helper to find DOM nodes returning them as array like loopable object
+   * @param   { string|DOMNodeList } selector - either the query or the DOM nodes to arraify
+   * @param   { HTMLElement }        ctx      - context defining where the query will search for the DOM nodes
+   * @returns { Array } DOM nodes found as array
+   */
+
+  function $(selector, ctx) {
+    return domToArray(typeof selector === 'string' ? (ctx || document).querySelectorAll(selector) : selector);
+  }
+
+  /**
+   * Get all the element attributes as object
+   * @param   {HTMLElement} element - DOM node we want to parse
+   * @returns {Object} all the attributes found as a key value pairs
+   */
+
+  function DOMattributesToObject(element) {
+    return Array.from(element.attributes).reduce((acc, attribute) => {
+      acc[dashToCamelCase$1(attribute.name)] = attribute.value;
+      return acc;
+    }, {});
   }
 
   /**
@@ -1737,39 +2009,6 @@
 
   function get(els, name) {
     return parseNodes(els, name, 'getAttribute');
-  }
-
-  /**
-   * Get all the element attributes as object
-   * @param   {HTMLElement} element - DOM node we want to parse
-   * @returns {Object} all the attributes found as a key value pairs
-   */
-
-  function DOMattributesToObject(element) {
-    return Array.from(element.attributes).reduce((acc, attribute) => {
-      acc[dashToCamelCase(attribute.name)] = attribute.value;
-      return acc;
-    }, {});
-  }
-  /**
-   * Get the tag name of any DOM node
-   * @param   {HTMLElement} element - DOM node we want to inspect
-   * @returns {string} name to identify this dom node in riot
-   */
-
-  function getName(element) {
-    return get(element, IS_DIRECTIVE) || element.tagName.toLowerCase();
-  }
-
-  /**
-   * Simple helper to find DOM nodes returning them as array like loopable object
-   * @param   { string|DOMNodeList } selector - either the query or the DOM nodes to arraify
-   * @param   { HTMLElement }        ctx      - context defining where the query will search for the DOM nodes
-   * @returns { Array } DOM nodes found as array
-   */
-
-  function $(selector, ctx) {
-    return domToArray(typeof selector === 'string' ? (ctx || document).querySelectorAll(selector) : selector);
   }
 
   const CSS_BY_NAME = new Map();
@@ -1862,6 +2101,16 @@
     };
   }
 
+  /**
+   * Get the tag name of any DOM node
+   * @param   {HTMLElement} element - DOM node we want to inspect
+   * @returns {string} name to identify this dom node in riot
+   */
+
+  function getName(element) {
+    return get(element, IS_DIRECTIVE) || element.tagName.toLowerCase();
+  }
+
   const COMPONENT_CORE_HELPERS = Object.freeze({
     // component helpers
     $(selector) {
@@ -1873,33 +2122,114 @@
     }
 
   });
-  const COMPONENT_LIFECYCLE_METHODS = Object.freeze({
-    shouldUpdate: noop,
-    onBeforeMount: noop,
-    onMounted: noop,
-    onBeforeUpdate: noop,
-    onUpdated: noop,
-    onBeforeUnmount: noop,
-    onUnmounted: noop
+  const PURE_COMPONENT_API = Object.freeze({
+    [MOUNT_METHOD_KEY]: noop,
+    [UPDATE_METHOD_KEY]: noop,
+    [UNMOUNT_METHOD_KEY]: noop
   });
-  const MOCKED_TEMPLATE_INTERFACE = {
-    update: noop,
-    mount: noop,
-    unmount: noop,
+  const COMPONENT_LIFECYCLE_METHODS = Object.freeze({
+    [SHOULD_UPDATE_KEY]: noop,
+    [ON_BEFORE_MOUNT_KEY]: noop,
+    [ON_MOUNTED_KEY]: noop,
+    [ON_BEFORE_UPDATE_KEY]: noop,
+    [ON_UPDATED_KEY]: noop,
+    [ON_BEFORE_UNMOUNT_KEY]: noop,
+    [ON_UNMOUNTED_KEY]: noop
+  });
+  const MOCKED_TEMPLATE_INTERFACE = Object.assign({}, PURE_COMPONENT_API, {
     clone: noop,
     createDOM: noop
-    /**
-     * Factory function to create the component templates only once
-     * @param   {Function} template - component template creation function
-     * @param   {Object} components - object containing the nested components
-     * @returns {TemplateChunk} template chunk object
-     */
+  });
+  /**
+   * Evaluate the component properties either from its real attributes or from its initial user properties
+   * @param   {HTMLElement} element - component root
+   * @param   {Object}  initialProps - initial props
+   * @returns {Object} component props key value pairs
+   */
 
-  };
+  function evaluateInitialProps(element, initialProps) {
+    if (initialProps === void 0) {
+      initialProps = {};
+    }
+
+    return Object.assign({}, DOMattributesToObject(element), {}, callOrAssign(initialProps));
+  }
+  /**
+   * Bind a DOM node to its component object
+   * @param   {HTMLElement} node - html node mounted
+   * @param   {Object} component - Riot.js component object
+   * @returns {Object} the component object received as second argument
+   */
+
+
+  const bindDOMNodeToComponentObject = (node, component) => node[DOM_COMPONENT_INSTANCE_PROPERTY] = component;
+  /**
+   * Wrap the Riot.js core API methods using a mapping function
+   * @param   {Function} mapFunction - lifting function
+   * @returns {Object} an object having the { mount, update, unmount } functions
+   */
+
+
+  function createCoreAPIMethods(mapFunction) {
+    return [MOUNT_METHOD_KEY, UPDATE_METHOD_KEY, UNMOUNT_METHOD_KEY].reduce((acc, method) => {
+      acc[method] = mapFunction(method);
+      return acc;
+    }, {});
+  }
+  /**
+   * Factory function to create the component templates only once
+   * @param   {Function} template - component template creation function
+   * @param   {Object} components - object containing the nested components
+   * @returns {TemplateChunk} template chunk object
+   */
+
 
   function componentTemplateFactory(template, components) {
     return template(create$6, expressionTypes, bindingTypes, name => {
       return components[name] || COMPONENTS_IMPLEMENTATION_MAP.get(name);
+    });
+  }
+  /**
+   * Create a pure component
+   * @param   {Function} pureFactoryFunction - pure component factory function
+   * @param   {Array} options.slots - component slots
+   * @param   {Array} options.attributes - component attributes
+   * @param   {Array} options.template - template factory function
+   * @param   {Array} options.template - template factory function
+   * @param   {any} options.props - initial component properties
+   * @returns {Object} pure component object
+   */
+
+
+  function createPureComponent(pureFactoryFunction, _ref) {
+    let {
+      slots,
+      attributes,
+      props,
+      css,
+      template
+    } = _ref;
+    if (template) panic('Pure components can not have html');
+    if (css) panic('Pure components do not have css');
+    const component = defineDefaults(pureFactoryFunction({
+      slots,
+      attributes,
+      props
+    }), PURE_COMPONENT_API);
+    return createCoreAPIMethods(method => function () {
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      // intercept the mount calls to bind the DOM node to the pure object created
+      // see also https://github.com/riot/riot/issues/2806
+      if (method === MOUNT_METHOD_KEY) {
+        const [el] = args;
+        bindDOMNodeToComponentObject(el, component);
+      }
+
+      component[method](...args);
+      return component;
     });
   }
   /**
@@ -1912,20 +2242,28 @@
    */
 
 
-  function createComponent(_ref) {
+  function createComponent(_ref2) {
     let {
       css,
       template,
       exports,
       name
-    } = _ref;
+    } = _ref2;
     const templateFn = template ? componentTemplateFactory(template, exports ? createSubcomponents(exports.components) : {}) : MOCKED_TEMPLATE_INTERFACE;
-    return (_ref2) => {
+    return (_ref3) => {
       let {
         slots,
         attributes,
         props
-      } = _ref2;
+      } = _ref3;
+      // pure components rendering will be managed by the end user
+      if (exports && exports[IS_PURE_SYMBOL]) return createPureComponent(exports, {
+        slots,
+        attributes,
+        props,
+        css,
+        template
+      });
       const componentAPI = callOrAssign(exports) || {};
       const component = defineComponent({
         css,
@@ -1964,41 +2302,27 @@
    * @returns {Object} a new component implementation object
    */
 
-  function defineComponent(_ref3) {
+  function defineComponent(_ref4) {
     let {
       css,
       template,
       componentAPI,
       name
-    } = _ref3;
+    } = _ref4;
     // add the component css into the DOM
     if (css && name) cssManager.add(name, css);
     return curry(enhanceComponentAPI)(defineProperties( // set the component defaults without overriding the original component API
     defineDefaults(componentAPI, Object.assign({}, COMPONENT_LIFECYCLE_METHODS, {
-      state: {}
+      [STATE_KEY]: {}
     })), Object.assign({
       // defined during the component creation
-      slots: null,
-      root: null
+      [SLOTS_KEY]: null,
+      [ROOT_KEY]: null
     }, COMPONENT_CORE_HELPERS, {
       name,
       css,
       template
     })));
-  }
-  /**
-   * Evaluate the component properties either from its real attributes or from its attribute expressions
-   * @param   {HTMLElement} element - component root
-   * @param   {Array}  attributeExpressions - attribute values generated via createAttributeBindings
-   * @returns {Object} attributes key value pairs
-   */
-
-  function evaluateProps(element, attributeExpressions) {
-    if (attributeExpressions === void 0) {
-      attributeExpressions = [];
-    }
-
-    return Object.assign({}, DOMattributesToObject(element), {}, evaluateAttributeExpressions(attributeExpressions));
   }
   /**
    * Create the bindings to update the component attributes
@@ -2007,7 +2331,6 @@
    * @returns {TemplateChunk} - template bindings object
    */
 
-
   function createAttributeBindings(node, attributes) {
     if (attributes === void 0) {
       attributes = [];
@@ -2015,18 +2338,12 @@
 
     const expressions = attributes.map(a => create$2(node, a));
     const binding = {};
-
-    const updateValues = method => scope => {
+    return Object.assign(binding, Object.assign({
+      expressions
+    }, createCoreAPIMethods(method => scope => {
       expressions.forEach(e => e[method](scope));
       return binding;
-    };
-
-    return Object.assign(binding, {
-      expressions,
-      mount: updateValues('mount'),
-      update: updateValues('update'),
-      unmount: updateValues('unmount')
-    });
+    })));
   }
   /**
    * Create the subcomponents that can be included inside a tag in runtime
@@ -2040,8 +2357,8 @@
       components = {};
     }
 
-    return Object.entries(callOrAssign(components)).reduce((acc, _ref4) => {
-      let [key, value] = _ref4;
+    return Object.entries(callOrAssign(components)).reduce((acc, _ref5) => {
+      let [key, value] = _ref5;
       acc[camelToDashCase(key)] = createComponent(value);
       return acc;
     }, {});
@@ -2077,7 +2394,7 @@
 
   function addCssHook(element, name) {
     if (getName(element) !== name) {
-      set(element, 'is', name);
+      set(element, IS_DIRECTIVE, name);
     }
   }
   /**
@@ -2089,13 +2406,12 @@
    */
 
 
-  function enhanceComponentAPI(component, _ref5) {
+  function enhanceComponentAPI(component, _ref6) {
     let {
       slots,
       attributes,
       props
-    } = _ref5;
-    const initialProps = callOrAssign(props);
+    } = _ref6;
     return autobindMethods(runPlugins(defineProperties(Object.create(component), {
       mount(element, state, parentScope) {
         if (state === void 0) {
@@ -2103,22 +2419,23 @@
         }
 
         this[ATTRIBUTES_KEY_SYMBOL] = createAttributeBindings(element, attributes).mount(parentScope);
-        this.props = Object.freeze(Object.assign({}, initialProps, {}, evaluateProps(element, this[ATTRIBUTES_KEY_SYMBOL].expressions)));
-        this.state = computeState(this.state, state);
+        defineProperty(this, PROPS_KEY, Object.freeze(Object.assign({}, evaluateInitialProps(element, props), {}, evaluateAttributeExpressions$1(this[ATTRIBUTES_KEY_SYMBOL].expressions))));
+        this[STATE_KEY] = computeState(this[STATE_KEY], state);
         this[TEMPLATE_KEY_SYMBOL] = this.template.createDOM(element).clone(); // link this object to the DOM node
 
-        element[DOM_COMPONENT_INSTANCE_PROPERTY] = this; // add eventually the 'is' attribute
+        bindDOMNodeToComponentObject(element, this); // add eventually the 'is' attribute
 
         component.name && addCssHook(element, component.name); // define the root element
 
-        defineProperty(this, 'root', element); // define the slots array
+        defineProperty(this, ROOT_KEY, element); // define the slots array
 
-        defineProperty(this, 'slots', slots); // before mount lifecycle event
+        defineProperty(this, SLOTS_KEY, slots); // before mount lifecycle event
 
-        this.onBeforeMount(this.props, this.state); // mount the template
+        this[ON_BEFORE_MOUNT_KEY](this[PROPS_KEY], this[STATE_KEY]); // mount the template
 
         this[TEMPLATE_KEY_SYMBOL].mount(element, this, parentScope);
-        this.onMounted(this.props, this.state);
+        this[PARENT_KEY_SYMBOL] = parentScope;
+        this[ON_MOUNTED_KEY](this[PROPS_KEY], this[STATE_KEY]);
         return this;
       },
 
@@ -2131,27 +2448,27 @@
           this[ATTRIBUTES_KEY_SYMBOL].update(parentScope);
         }
 
-        const newProps = evaluateProps(this.root, this[ATTRIBUTES_KEY_SYMBOL].expressions);
-        if (this.shouldUpdate(newProps, this.props) === false) return;
-        this.props = Object.freeze(Object.assign({}, initialProps, {}, newProps));
-        this.state = computeState(this.state, state);
-        this.onBeforeUpdate(this.props, this.state);
-        this[TEMPLATE_KEY_SYMBOL].update(this, parentScope);
-        this.onUpdated(this.props, this.state);
+        const newProps = evaluateAttributeExpressions$1(this[ATTRIBUTES_KEY_SYMBOL].expressions);
+        if (this[SHOULD_UPDATE_KEY](newProps, this[PROPS_KEY]) === false) return;
+        defineProperty(this, PROPS_KEY, Object.freeze(Object.assign({}, this[PROPS_KEY], {}, newProps)));
+        this[STATE_KEY] = computeState(this[STATE_KEY], state);
+        this[ON_BEFORE_UPDATE_KEY](this[PROPS_KEY], this[STATE_KEY]);
+        this[TEMPLATE_KEY_SYMBOL].update(this, this[PARENT_KEY_SYMBOL]);
+        this[ON_UPDATED_KEY](this[PROPS_KEY], this[STATE_KEY]);
         return this;
       },
 
       unmount(preserveRoot) {
-        this.onBeforeUnmount(this.props, this.state);
+        this[ON_BEFORE_UNMOUNT_KEY](this[PROPS_KEY], this[STATE_KEY]);
         this[ATTRIBUTES_KEY_SYMBOL].unmount(); // if the preserveRoot is null the template html will be left untouched
         // in that case the DOM cleanup will happen differently from a parent node
 
-        this[TEMPLATE_KEY_SYMBOL].unmount(this, {}, preserveRoot === null ? null : !preserveRoot);
-        this.onUnmounted(this.props, this.state);
+        this[TEMPLATE_KEY_SYMBOL].unmount(this, this[PARENT_KEY_SYMBOL], preserveRoot === null ? null : !preserveRoot);
+        this[ON_UNMOUNTED_KEY](this[PROPS_KEY], this[STATE_KEY]);
         return this;
       }
 
-    })), Object.keys(component).filter(prop => isFunction(component[prop])));
+    })), Object.keys(component).filter(prop => isFunction$1(component[prop])));
   }
   /**
    * Component initialization function starting from a DOM node
@@ -2272,7 +2589,7 @@
    */
 
   function install(plugin) {
-    if (!isFunction(plugin)) panic('Plugins must be of type function');
+    if (!isFunction$1(plugin)) panic('Plugins must be of type function');
     if (PLUGINS_SET$1.has(plugin)) panic('This plugin was already install');
     PLUGINS_SET$1.add(plugin);
     return PLUGINS_SET$1;
@@ -2295,16 +2612,38 @@
    */
 
   function component(implementation) {
-    return (el, props) => compose(c => c.mount(el), c => c({
-      props
-    }), createComponent)(implementation);
+    return function (el, props, _temp) {
+      let {
+        slots,
+        attributes,
+        parentScope
+      } = _temp === void 0 ? {} : _temp;
+      return compose(c => c.mount(el, parentScope), c => c({
+        props,
+        slots,
+        attributes
+      }), createComponent)(implementation);
+    };
+  }
+  /**
+   * Lift a riot component Interface into a pure riot object
+   * @param   {Function} func - RiotPureComponent factory function
+   * @returns {Function} the lifted original function received as argument
+   */
+
+  function pure(func) {
+    if (!isFunction$1(func)) panic('riot.pure accepts only arguments of type "function"');
+    func[IS_PURE_SYMBOL] = true;
+    return func;
   }
   /** @type {string} current riot version */
 
-  const version = 'v4.3.5'; // expose some internal stuff that might be used from external tools
+  const version = 'v4.11.1'; // expose some internal stuff that might be used from external tools
 
   const __ = {
     cssManager,
+    DOMBindings,
+    createComponent,
     defineComponent,
     globals
   };
@@ -2313,6 +2652,7 @@
   exports.component = component;
   exports.install = install;
   exports.mount = mount;
+  exports.pure = pure;
   exports.register = register;
   exports.uninstall = uninstall;
   exports.unmount = unmount;
@@ -2321,7 +2661,7 @@
 
   Object.defineProperty(exports, '__esModule', { value: true });
 
-}));
+})));
 
 },{}],2:[function(require,module,exports){
 "use strict";
@@ -2334,13 +2674,13 @@ var _default = {
   'css': `about div,[is="about"] div{ max-width: 800px; margin: 0 auto;}`,
   'exports': null,
   'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<div expr20></div>', [{
+    return template('<div expr25="expr25"></div>', [{
       'type': bindingTypes.IF,
       'evaluate': function (scope) {
         return scope.props.show;
       },
-      'redundantAttribute': 'expr20',
-      'selector': '[expr20]',
+      'redundantAttribute': 'expr25',
+      'selector': '[expr25]',
       'template': template('<h3>About</h3><p>Lightning Cards is a simple flash card web app made by Aliya N. Anindita a.k.a <a href="https://pseudomon.github.io">PseudoMon</a> simply because she needs a flash card app but is mildly annoyed that Anki is so complicated.</p><p>This app is completely front-end, so you can probably just save the page and it\'ll work offline. It automatically saves your decks locally in your browser, but you can also use the import/exporter feature to create a backup or to move to a different system/browser.</p><p>I give absolutely no guarantee that this app will work all the time. But if you encounter something fishy, you can contact me and I\'ll give it a look.</p><p>Got comments? Suggestions? Questions? Just want to say hi? Want to tell the developer that she hasn\'t been wasting her time making this thing? You can contact me on <a href="https://twitter.com/PseudoStygian">Twitter</a> or through <a href="https://pseudomon.github.io/contact">this form</a>.</p><p>For more info about the app, see the <a href="https://github.com/PseudoMon/lightningcards">Repository</a>.\r\n  </p>', [])
     }]);
   },
@@ -2441,7 +2781,7 @@ var _default = {
 
   },
   'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<div class="card editing"><div class="half top"><half-card expr10 front-or-back="front"></half-card></div><div class="half bottom"><half-card expr11 front-or-back="back"></half-card></div></div><div expr12 class="buttons"><button>Save card</button></div>', [{
+    return template('<div class="card editing"><div class="half top"><half-card expr22="expr22" front-or-back="front"></half-card></div><div class="half bottom"><half-card expr23="expr23" front-or-back="back"></half-card></div></div><div expr24="expr24" class="buttons"><button>Save card</button></div>', [{
       'type': bindingTypes.TAG,
       'getComponent': getComponent,
       'evaluate': function (scope) {
@@ -2449,12 +2789,6 @@ var _default = {
       },
       'slots': [],
       'attributes': [{
-        'type': expressionTypes.ATTRIBUTE,
-        'name': 'front-or-back',
-        'evaluate': function () {
-          return 'front';
-        }
-      }, {
         'type': expressionTypes.ATTRIBUTE,
         'name': 'text',
         'evaluate': function (scope) {
@@ -2485,8 +2819,8 @@ var _default = {
           return newSyn => scope.addSyn('front', newSyn);
         }
       }],
-      'redundantAttribute': 'expr10',
-      'selector': '[expr10]'
+      'redundantAttribute': 'expr22',
+      'selector': '[expr22]'
     }, {
       'type': bindingTypes.TAG,
       'getComponent': getComponent,
@@ -2495,12 +2829,6 @@ var _default = {
       },
       'slots': [],
       'attributes': [{
-        'type': expressionTypes.ATTRIBUTE,
-        'name': 'front-or-back',
-        'evaluate': function () {
-          return 'back';
-        }
-      }, {
         'type': expressionTypes.ATTRIBUTE,
         'name': 'text',
         'evaluate': function (scope) {
@@ -2531,11 +2859,11 @@ var _default = {
           return newSyn => scope.addSyn('back', newSyn);
         }
       }],
-      'redundantAttribute': 'expr11',
-      'selector': '[expr11]'
+      'redundantAttribute': 'expr23',
+      'selector': '[expr23]'
     }, {
-      'redundantAttribute': 'expr12',
-      'selector': '[expr12]',
+      'redundantAttribute': 'expr24',
+      'selector': '[expr24]',
       'expressions': [{
         'type': expressionTypes.EVENT,
         'name': 'onclick',
@@ -2633,7 +2961,7 @@ var _default = {
 
   },
   'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<div><notification expr13></notification><headnav expr14 title="Lightning Cards"></headnav><about expr15></about><main-menu expr16></main-menu><deck-edit-container expr17></deck-edit-container><playing-container expr18></playing-container><footernav expr19></footernav></div>', [{
+    return template('<div><notification expr0="expr0"></notification><headnav expr1="expr1" title="Lightning Cards"></headnav><about expr2="expr2"></about><main-menu expr3="expr3"></main-menu><deck-edit-container expr4="expr4"></deck-edit-container><playing-container expr5="expr5"></playing-container><footernav expr6="expr6"></footernav></div>', [{
       'type': bindingTypes.TAG,
       'getComponent': getComponent,
       'evaluate': function (scope) {
@@ -2641,7 +2969,7 @@ var _default = {
       },
       'slots': [{
         'id': 'default',
-        'html': '<!---->',
+        'html': ' ',
         'bindings': [{
           'expressions': [{
             'type': expressionTypes.TEXT,
@@ -2653,8 +2981,8 @@ var _default = {
         }]
       }],
       'attributes': [],
-      'redundantAttribute': 'expr13',
-      'selector': '[expr13]'
+      'redundantAttribute': 'expr0',
+      'selector': '[expr0]'
     }, {
       'type': bindingTypes.TAG,
       'getComponent': getComponent,
@@ -2663,12 +2991,6 @@ var _default = {
       },
       'slots': [],
       'attributes': [{
-        'type': expressionTypes.ATTRIBUTE,
-        'name': 'title',
-        'evaluate': function () {
-          return 'Lightning Cards';
-        }
-      }, {
         'type': expressionTypes.ATTRIBUTE,
         'name': 'session',
         'evaluate': function (scope) {
@@ -2687,8 +3009,8 @@ var _default = {
           return screen => scope.openScreen(screen);
         }
       }],
-      'redundantAttribute': 'expr14',
-      'selector': '[expr14]'
+      'redundantAttribute': 'expr1',
+      'selector': '[expr1]'
     }, {
       'type': bindingTypes.TAG,
       'getComponent': getComponent,
@@ -2703,8 +3025,8 @@ var _default = {
           return scope.state.currentScreen === 'about' ? true : false;
         }
       }],
-      'redundantAttribute': 'expr15',
-      'selector': '[expr15]'
+      'redundantAttribute': 'expr2',
+      'selector': '[expr2]'
     }, {
       'type': bindingTypes.TAG,
       'getComponent': getComponent,
@@ -2743,8 +3065,8 @@ var _default = {
           return () => scope.openScreen('deck view');
         }
       }],
-      'redundantAttribute': 'expr16',
-      'selector': '[expr16]'
+      'redundantAttribute': 'expr3',
+      'selector': '[expr3]'
     }, {
       'type': bindingTypes.TAG,
       'getComponent': getComponent,
@@ -2777,8 +3099,8 @@ var _default = {
           return () => scope.openScreen('main menu');
         }
       }],
-      'redundantAttribute': 'expr17',
-      'selector': '[expr17]'
+      'redundantAttribute': 'expr4',
+      'selector': '[expr4]'
     }, {
       'type': bindingTypes.TAG,
       'getComponent': getComponent,
@@ -2835,8 +3157,8 @@ var _default = {
           return () => scope.openScreen('deck view');
         }
       }],
-      'redundantAttribute': 'expr18',
-      'selector': '[expr18]'
+      'redundantAttribute': 'expr5',
+      'selector': '[expr5]'
     }, {
       'type': bindingTypes.TAG,
       'getComponent': getComponent,
@@ -2851,8 +3173,8 @@ var _default = {
           return () => scope.openScreen('about');
         }
       }],
-      'redundantAttribute': 'expr19',
-      'selector': '[expr19]'
+      'redundantAttribute': 'expr6',
+      'selector': '[expr6]'
     }]);
   },
   'name': 'container'
@@ -2915,14 +3237,14 @@ var _default = {
 
   },
   'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<h2 class="deckname"><span expr49></span><form expr50></form></h2><div class="header"><button expr52>Edit Deck Name</button><button expr53>Add New Card</button><button expr54>Import/Export Deck</button><button expr55>Manage Decks</button></div><div class="cardlist"><div expr56 class="smallcard"></div></div>', [{
+    return template('<h2 class="deckname"><span expr58="expr58"></span><form expr59="expr59"></form></h2><div class="header"><button expr61="expr61">Edit Deck Name</button><button expr62="expr62">Add New Card</button><button expr63="expr63">Import/Export Deck</button><button expr64="expr64">Manage Decks</button></div><div class="cardlist"><div expr65="expr65" class="smallcard"></div></div>', [{
       'type': bindingTypes.IF,
       'evaluate': function (scope) {
         return !scope.state.editingName;
       },
-      'redundantAttribute': 'expr49',
-      'selector': '[expr49]',
-      'template': template('<!---->', [{
+      'redundantAttribute': 'expr58',
+      'selector': '[expr58]',
+      'template': template(' ', [{
         'expressions': [{
           'type': expressionTypes.TEXT,
           'childNodeIndex': 0,
@@ -2936,9 +3258,9 @@ var _default = {
       'evaluate': function (scope) {
         return scope.state.editingName;
       },
-      'redundantAttribute': 'expr50',
-      'selector': '[expr50]',
-      'template': template('<input expr51 id="namefield" type="text" name="newname" autocomplete="off"/>', [{
+      'redundantAttribute': 'expr59',
+      'selector': '[expr59]',
+      'template': template('<input expr60="expr60" id="namefield" type="text" name="newname" autocomplete="off"/>', [{
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onsubmit',
@@ -2947,8 +3269,8 @@ var _default = {
           }
         }]
       }, {
-        'redundantAttribute': 'expr51',
-        'selector': '[expr51]',
+        'redundantAttribute': 'expr60',
+        'selector': '[expr60]',
         'expressions': [{
           'type': expressionTypes.VALUE,
           'evaluate': function (scope) {
@@ -2957,8 +3279,8 @@ var _default = {
         }]
       }])
     }, {
-      'redundantAttribute': 'expr52',
-      'selector': '[expr52]',
+      'redundantAttribute': 'expr61',
+      'selector': '[expr61]',
       'expressions': [{
         'type': expressionTypes.EVENT,
         'name': 'onclick',
@@ -2967,8 +3289,8 @@ var _default = {
         }
       }]
     }, {
-      'redundantAttribute': 'expr53',
-      'selector': '[expr53]',
+      'redundantAttribute': 'expr62',
+      'selector': '[expr62]',
       'expressions': [{
         'type': expressionTypes.EVENT,
         'name': 'onclick',
@@ -2977,8 +3299,8 @@ var _default = {
         }
       }]
     }, {
-      'redundantAttribute': 'expr54',
-      'selector': '[expr54]',
+      'redundantAttribute': 'expr63',
+      'selector': '[expr63]',
       'expressions': [{
         'type': expressionTypes.EVENT,
         'name': 'onclick',
@@ -2987,8 +3309,8 @@ var _default = {
         }
       }]
     }, {
-      'redundantAttribute': 'expr55',
-      'selector': '[expr55]',
+      'redundantAttribute': 'expr64',
+      'selector': '[expr64]',
       'expressions': [{
         'type': expressionTypes.EVENT,
         'name': 'onclick',
@@ -3000,7 +3322,7 @@ var _default = {
       'type': bindingTypes.EACH,
       'getKey': null,
       'condition': null,
-      'template': template('<div expr57 class="xbutton">\r\n        x\r\n      </div><div expr58 class="front"><!----></div><div expr59 class="back"><!----></div>', [{
+      'template': template('<div expr66="expr66" class="xbutton">\r\n        x\r\n      </div><div expr67="expr67" class="front"> </div><div expr68="expr68" class="back"> </div>', [{
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onclick',
@@ -3015,8 +3337,8 @@ var _default = {
           }
         }]
       }, {
-        'redundantAttribute': 'expr57',
-        'selector': '[expr57]',
+        'redundantAttribute': 'expr66',
+        'selector': '[expr66]',
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onclick',
@@ -3037,13 +3359,13 @@ var _default = {
           }
         }]
       }, {
-        'redundantAttribute': 'expr58',
-        'selector': '[expr58]',
+        'redundantAttribute': 'expr67',
+        'selector': '[expr67]',
         'expressions': [{
           'type': expressionTypes.TEXT,
           'childNodeIndex': 0,
           'evaluate': function (scope) {
-            return ['\r\n        ', scope.card.front, '\r\n      '].join('');
+            return [scope.card.front].join('');
           }
         }, {
           'type': expressionTypes.ATTRIBUTE,
@@ -3053,13 +3375,13 @@ var _default = {
           }
         }]
       }, {
-        'redundantAttribute': 'expr59',
-        'selector': '[expr59]',
+        'redundantAttribute': 'expr68',
+        'selector': '[expr68]',
         'expressions': [{
           'type': expressionTypes.TEXT,
           'childNodeIndex': 0,
           'evaluate': function (scope) {
-            return ['\r\n        ', scope.card.back, '\r\n      '].join('');
+            return [scope.card.back].join('');
           }
         }, {
           'type': expressionTypes.ATTRIBUTE,
@@ -3069,8 +3391,8 @@ var _default = {
           }
         }]
       }]),
-      'redundantAttribute': 'expr56',
-      'selector': '[expr56]',
+      'redundantAttribute': 'expr65',
+      'selector': '[expr65]',
       'itemName': 'card',
       'indexName': 'i',
       'evaluate': function (scope) {
@@ -3111,9 +3433,9 @@ var _default = {
 
   },
   'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<h2>Decks</h2><p>These decks are saved locally in your browser. Use the export feature to keep a backup or to import them to a different system.</p><p><button expr60>New deck</button></p><div expr61 class="row deck"></div>', [{
-      'redundantAttribute': 'expr60',
-      'selector': '[expr60]',
+    return template('<h2>Decks</h2><p>These decks are saved locally in your browser. Use the export feature to keep a backup or to import them to a different system.</p><p><button expr50="expr50">New deck</button></p><div expr51="expr51" class="row deck"></div>', [{
+      'redundantAttribute': 'expr50',
+      'selector': '[expr50]',
       'expressions': [{
         'type': expressionTypes.EVENT,
         'name': 'onclick',
@@ -3125,19 +3447,19 @@ var _default = {
       'type': bindingTypes.EACH,
       'getKey': null,
       'condition': null,
-      'template': template('<div class="one-third column"><div class="smalldeck"><div expr62 class="innercard"><!----></div></div></div><div class="two-thirds column deckcontrol"><div><button expr63>\r\n            Use Deck\r\n          </button><button expr64>\r\n            Remove Deck\r\n          </button></div></div>', [{
-        'redundantAttribute': 'expr62',
-        'selector': '[expr62]',
+      'template': template('<div class="one-third column"><div class="smalldeck"><div expr52="expr52" class="innercard"> </div></div></div><div class="two-thirds column deckcontrol"><div><button expr53="expr53">\r\n            Use Deck\r\n          </button><button expr54="expr54">\r\n            Remove Deck\r\n          </button></div></div>', [{
+        'redundantAttribute': 'expr52',
+        'selector': '[expr52]',
         'expressions': [{
           'type': expressionTypes.TEXT,
           'childNodeIndex': 0,
           'evaluate': function (scope) {
-            return ['\r\n            ', scope.deck.name, '\r\n          '].join('');
+            return [scope.deck.name].join('');
           }
         }]
       }, {
-        'redundantAttribute': 'expr63',
-        'selector': '[expr63]',
+        'redundantAttribute': 'expr53',
+        'selector': '[expr53]',
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onclick',
@@ -3146,8 +3468,8 @@ var _default = {
           }
         }]
       }, {
-        'redundantAttribute': 'expr64',
-        'selector': '[expr64]',
+        'redundantAttribute': 'expr54',
+        'selector': '[expr54]',
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onclick',
@@ -3156,8 +3478,8 @@ var _default = {
           }
         }]
       }]),
-      'redundantAttribute': 'expr61',
-      'selector': '[expr61]',
+      'redundantAttribute': 'expr51',
+      'selector': '[expr51]',
       'itemName': 'deck',
       'indexName': 'i',
       'evaluate': function (scope) {
@@ -3260,20 +3582,20 @@ var _default = {
 
   },
   'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<div expr31></div>', [{
+    return template('<div expr32="expr32"></div>', [{
       'type': bindingTypes.IF,
       'evaluate': function (scope) {
         return scope.props.show;
       },
-      'redundantAttribute': 'expr31',
-      'selector': '[expr31]',
-      'template': template('<deck-list expr32></deck-list><card-list expr33></card-list><card-edit expr34></card-edit><import-exporter expr35></import-exporter>', [{
+      'redundantAttribute': 'expr32',
+      'selector': '[expr32]',
+      'template': template('<deck-list expr33="expr33"></deck-list><card-list expr34="expr34"></card-list><card-edit expr35="expr35"></card-edit><import-exporter expr36="expr36"></import-exporter>', [{
         'type': bindingTypes.IF,
         'evaluate': function (scope) {
           return scope.state.isManagingDecks;
         },
-        'redundantAttribute': 'expr32',
-        'selector': '[expr32]',
+        'redundantAttribute': 'expr33',
+        'selector': '[expr33]',
         'template': template(null, [{
           'type': bindingTypes.TAG,
           'getComponent': getComponent,
@@ -3312,8 +3634,8 @@ var _default = {
         'evaluate': function (scope) {
           return !scope.state.editingCard && !scope.state.isImportExporting && !scope.state.isManagingDecks;
         },
-        'redundantAttribute': 'expr33',
-        'selector': '[expr33]',
+        'redundantAttribute': 'expr34',
+        'selector': '[expr34]',
         'template': template(null, [{
           'type': bindingTypes.TAG,
           'getComponent': getComponent,
@@ -3370,8 +3692,8 @@ var _default = {
         'evaluate': function (scope) {
           return scope.state.editingCard;
         },
-        'redundantAttribute': 'expr34',
-        'selector': '[expr34]',
+        'redundantAttribute': 'expr35',
+        'selector': '[expr35]',
         'template': template(null, [{
           'type': bindingTypes.TAG,
           'getComponent': getComponent,
@@ -3404,8 +3726,8 @@ var _default = {
         'evaluate': function (scope) {
           return scope.state.isImportExporting;
         },
-        'redundantAttribute': 'expr35',
-        'selector': '[expr35]',
+        'redundantAttribute': 'expr36',
+        'selector': '[expr36]',
         'template': template(null, [{
           'type': bindingTypes.TAG,
           'getComponent': getComponent,
@@ -3450,9 +3772,9 @@ var _default = {
   'css': `footernav,[is="footernav"]{ width: 100%; display: flex; justify-content: space-between; height: 60px; margin-top: 100px; } footernav div,[is="footernav"] div{ margin: 0 1em; }`,
   'exports': null,
   'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<div>\r\n    V1.0\r\n  </div><div><a expr9 href="#">About</a></div>', [{
-      'redundantAttribute': 'expr9',
-      'selector': '[expr9]',
+    return template('<div>\r\n    V1.0\r\n  </div><div><a expr31="expr31" href="#">About</a></div>', [{
+      'redundantAttribute': 'expr31',
+      'selector': '[expr31]',
       'expressions': [{
         'type': expressionTypes.EVENT,
         'name': 'onclick',
@@ -3534,14 +3856,14 @@ var _default = {
 
   },
   'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<div expr40 class="label"><!----></div><div class="maintext"><span expr41></span><form expr42></form></div><div class="synonyms"><span expr44 class="syn"></span><form expr46></form><button expr48></button></div>', [{
-      'redundantAttribute': 'expr40',
-      'selector': '[expr40]',
+    return template('<div expr41="expr41" class="label"> </div><div class="maintext"><span expr42="expr42"></span><form expr43="expr43"></form></div><div class="synonyms"><span expr45="expr45" class="syn"></span><form expr47="expr47"></form><button expr49="expr49"></button></div>', [{
+      'redundantAttribute': 'expr41',
+      'selector': '[expr41]',
       'expressions': [{
         'type': expressionTypes.TEXT,
         'childNodeIndex': 0,
         'evaluate': function (scope) {
-          return ['\r\n    ', scope.props.frontOrBack, '\r\n  '].join('');
+          return [scope.props.frontOrBack].join('');
         }
       }]
     }, {
@@ -3549,9 +3871,9 @@ var _default = {
       'evaluate': function (scope) {
         return !scope.state.editing;
       },
-      'redundantAttribute': 'expr41',
-      'selector': '[expr41]',
-      'template': template('<!---->', [{
+      'redundantAttribute': 'expr42',
+      'selector': '[expr42]',
+      'template': template(' ', [{
         'expressions': [{
           'type': expressionTypes.TEXT,
           'childNodeIndex': 0,
@@ -3571,9 +3893,9 @@ var _default = {
       'evaluate': function (scope) {
         return scope.state.editing;
       },
-      'redundantAttribute': 'expr42',
-      'selector': '[expr42]',
-      'template': template('<input expr43 id="mainfield" type="text" autocomplete="off"/>', [{
+      'redundantAttribute': 'expr43',
+      'selector': '[expr43]',
+      'template': template('<input expr44="expr44" id="mainfield" type="text" autocomplete="off"/>', [{
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onsubmit',
@@ -3582,8 +3904,8 @@ var _default = {
           }
         }]
       }, {
-        'redundantAttribute': 'expr43',
-        'selector': '[expr43]',
+        'redundantAttribute': 'expr44',
+        'selector': '[expr44]',
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'oninput',
@@ -3601,17 +3923,17 @@ var _default = {
       'type': bindingTypes.EACH,
       'getKey': null,
       'condition': null,
-      'template': template('<!----><span expr45 class="xbutton">x</span>', [{
+      'template': template(' <span expr46="expr46" class="xbutton">x</span>', [{
         'expressions': [{
           'type': expressionTypes.TEXT,
           'childNodeIndex': 0,
           'evaluate': function (scope) {
-            return ['\r\n      ', scope.syn, '\r\n      '].join('');
+            return [scope.syn].join('');
           }
         }]
       }, {
-        'redundantAttribute': 'expr45',
-        'selector': '[expr45]',
+        'redundantAttribute': 'expr46',
+        'selector': '[expr46]',
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onclick',
@@ -3620,8 +3942,8 @@ var _default = {
           }
         }]
       }]),
-      'redundantAttribute': 'expr44',
-      'selector': '[expr44]',
+      'redundantAttribute': 'expr45',
+      'selector': '[expr45]',
       'itemName': 'syn',
       'indexName': 'i',
       'evaluate': function (scope) {
@@ -3632,9 +3954,9 @@ var _default = {
       'evaluate': function (scope) {
         return scope.state.addingSyn;
       },
-      'redundantAttribute': 'expr46',
-      'selector': '[expr46]',
-      'template': template('<input expr47 id="synfield" type="text" autocomplete="off"/><button type="submit">Submit</button>', [{
+      'redundantAttribute': 'expr47',
+      'selector': '[expr47]',
+      'template': template('<input expr48="expr48" id="synfield" type="text" autocomplete="off"/><button type="submit">Submit</button>', [{
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onsubmit',
@@ -3643,8 +3965,8 @@ var _default = {
           }
         }]
       }, {
-        'redundantAttribute': 'expr47',
-        'selector': '[expr47]',
+        'redundantAttribute': 'expr48',
+        'selector': '[expr48]',
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'oninput',
@@ -3663,8 +3985,8 @@ var _default = {
       'evaluate': function (scope) {
         return !scope.state.addingSyn;
       },
-      'redundantAttribute': 'expr48',
-      'selector': '[expr48]',
+      'redundantAttribute': 'expr49',
+      'selector': '[expr49]',
       'template': template('Add synonym', [{
         'expressions': [{
           'type': expressionTypes.EVENT,
@@ -3690,9 +4012,9 @@ var _default = {
   'css': `headnav,[is="headnav"]{ width: 100%; display: flex; justify-content: space-between; height: 60px; margin-bottom: 20px; } headnav .title,[is="headnav"] .title{ font-weight: 500; cursor: pointer; } headnav h1,[is="headnav"] h1{line-height: 60px; } headnav div,[is="headnav"] div{line-height: 60px; } headnav .navlinks,[is="headnav"] .navlinks{ display: none; } @media (min-width: 750px) { headnav .navlinks,[is="headnav"] .navlinks{ display: block; } } headnav .navlinks a,[is="headnav"] .navlinks a{ margin: 0 1.2em; text-decoration: none; } headnav .correct,[is="headnav"] .correct{ font-weight: 500; color: #71a314; } headnav .played,[is="headnav"] .played{ font-weight: 500; }`,
   'exports': null,
   'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<div expr0 class="title"><!----></div><div class="navlinks"><a expr1 href="#">Main Menu</a><a expr2 href="#">View Deck</a><a expr3 href="#">Start Practice</a></div><div class="sessioncounter"><span expr4></span><span expr8></span></div>', [{
-      'redundantAttribute': 'expr0',
-      'selector': '[expr0]',
+    return template('<div expr13="expr13" class="title"> </div><div class="navlinks"><a expr14="expr14" href="#">Main Menu</a><a expr15="expr15" href="#">View Deck</a><a expr16="expr16" href="#">Start Practice</a></div><div class="sessioncounter"><span expr17="expr17"></span><span expr21="expr21"></span></div>', [{
+      'redundantAttribute': 'expr13',
+      'selector': '[expr13]',
       'expressions': [{
         'type': expressionTypes.TEXT,
         'childNodeIndex': 0,
@@ -3707,8 +4029,8 @@ var _default = {
         }
       }]
     }, {
-      'redundantAttribute': 'expr1',
-      'selector': '[expr1]',
+      'redundantAttribute': 'expr14',
+      'selector': '[expr14]',
       'expressions': [{
         'type': expressionTypes.EVENT,
         'name': 'onclick',
@@ -3717,8 +4039,8 @@ var _default = {
         }
       }]
     }, {
-      'redundantAttribute': 'expr2',
-      'selector': '[expr2]',
+      'redundantAttribute': 'expr15',
+      'selector': '[expr15]',
       'expressions': [{
         'type': expressionTypes.EVENT,
         'name': 'onclick',
@@ -3727,8 +4049,8 @@ var _default = {
         }
       }]
     }, {
-      'redundantAttribute': 'expr3',
-      'selector': '[expr3]',
+      'redundantAttribute': 'expr16',
+      'selector': '[expr16]',
       'expressions': [{
         'type': expressionTypes.EVENT,
         'name': 'onclick',
@@ -3741,36 +4063,36 @@ var _default = {
       'evaluate': function (scope) {
         return scope.props.isPlaying;
       },
-      'redundantAttribute': 'expr4',
-      'selector': '[expr4]',
-      'template': template('<span expr5 class="correct"><!----></span>/<span expr6 class="played"><!----></span>/<span expr7 class="total"><!----></span>', [{
-        'redundantAttribute': 'expr5',
-        'selector': '[expr5]',
+      'redundantAttribute': 'expr17',
+      'selector': '[expr17]',
+      'template': template('<span expr18="expr18" class="correct"> </span>/<span expr19="expr19" class="played"> </span>/<span expr20="expr20" class="total"> </span>', [{
+        'redundantAttribute': 'expr18',
+        'selector': '[expr18]',
         'expressions': [{
           'type': expressionTypes.TEXT,
           'childNodeIndex': 0,
           'evaluate': function (scope) {
-            return ['\r\n          ', scope.props.session.correctCounter, '\r\n        '].join('');
+            return [scope.props.session.correctCounter].join('');
           }
         }]
       }, {
-        'redundantAttribute': 'expr6',
-        'selector': '[expr6]',
+        'redundantAttribute': 'expr19',
+        'selector': '[expr19]',
         'expressions': [{
           'type': expressionTypes.TEXT,
           'childNodeIndex': 0,
           'evaluate': function (scope) {
-            return ['\r\n          ', scope.props.session.playedCounter, '\r\n        '].join('');
+            return [scope.props.session.playedCounter].join('');
           }
         }]
       }, {
-        'redundantAttribute': 'expr7',
-        'selector': '[expr7]',
+        'redundantAttribute': 'expr20',
+        'selector': '[expr20]',
         'expressions': [{
           'type': expressionTypes.TEXT,
           'childNodeIndex': 0,
           'evaluate': function (scope) {
-            return ['\r\n          ', scope.props.session.totalCount, ' Cards\r\n        '].join('');
+            return [scope.props.session.totalCount, ' Cards'].join('');
           }
         }]
       }])
@@ -3779,14 +4101,14 @@ var _default = {
       'evaluate': function (scope) {
         return !scope.props.isPlaying;
       },
-      'redundantAttribute': 'expr8',
-      'selector': '[expr8]',
-      'template': template('<!---->', [{
+      'redundantAttribute': 'expr21',
+      'selector': '[expr21]',
+      'template': template(' ', [{
         'expressions': [{
           'type': expressionTypes.TEXT,
           'childNodeIndex': 0,
           'evaluate': function (scope) {
-            return ['\r\n        ', scope.props.session.totalCount, ' cards in deck\r\n      '].join('');
+            return [scope.props.session.totalCount, ' cards in deck'].join('');
           }
         }]
       }])
@@ -3808,6 +4130,7 @@ var _default = {
     onBeforeMount() {
       this.state = {
         exportedDeck: '',
+        exportedDeckFile: '',
         deckToImport: '',
         imported: false
       };
@@ -3818,15 +4141,43 @@ var _default = {
     },
 
     getDeckExport() {
-      let cards = this.props.deck.cards;
+      let cards = this.props.deck.cards; // only get deck's name and cards, none of the functions etc
+
       let deck = {
         name: this.props.deck.name,
         cards: cards
       };
-      let exportedDeck = JSON.stringify(deck);
+      let exportedDeck = JSON.stringify(deck); // this is the content of the downloadable file
+
+      let exportedDeckFile = "data:text/json;charset=utf-8," + encodeURIComponent(exportedDeck);
+      let exportedDeckFilename = this.createDeckFilename(deck);
       this.update({
-        exportedDeck: exportedDeck
+        exportedDeck,
+        exportedDeckFile,
+        exportedDeckFilename
       });
+    },
+
+    createDeckFilename(deck) {
+      let safeName = encodeURIComponent(deck.name).toLowerCase().replace('%20', '-');
+      let name = "lightning-deck-" + safeName + ".json";
+      return name;
+    },
+
+    importFileChosen(e) {
+      // When a file is selected for import, read its content and put it into the state that fills the textbox.
+      const theFile = e.target.files[0];
+      let reader = new FileReader();
+
+      reader.onload = (() => {
+        return e => {
+          this.update({
+            deckToImport: e.target.result
+          });
+        };
+      })();
+
+      reader.readAsText(theFile);
     },
 
     importDeck() {
@@ -3847,9 +4198,25 @@ var _default = {
 
   },
   'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<div class="export"><h3>Deck Export</h3><p>Select everything in the textarea below and copy it somewhere safe.</p><div><textarea expr21><!----></textarea></div></div><div class="import"><h3>Import Deck</h3><p>This will completely replace your current deck with the imported deck. If you want to keep your current deck, create a new deck in Manage Decks menu.</p><p>Paste card data below and click the button.</p><div><textarea expr22><!----></textarea></div><div><button expr23>Click to import cards</button></div><h5 expr24></h5></div><div><button expr25>Go Back</button></div>', [{
-      'redundantAttribute': 'expr21',
-      'selector': '[expr21]',
+    return template('<div class="export"><h3>Deck Export</h3><p>Click the download button to save the backup file.</p><a expr184="expr184" class="button button-primary">Download</a><p>Alternatively, you can select everything in the textarea below and copy it somewhere safe.</p><div><textarea expr185="expr185"> </textarea></div></div><div class="import"><h3>Import Deck</h3><p>This will completely replace your current deck with the imported deck. If you want to keep your current deck, create a new deck in Manage Decks menu.</p><p>Open file or paste card data below and click the button.</p><input expr186="expr186" type="file"/><div><textarea expr187="expr187"> </textarea></div><div><button expr188="expr188">Click to import cards</button></div><h5 expr189="expr189"></h5></div><div><button expr190="expr190">Go Back</button></div>', [{
+      'redundantAttribute': 'expr184',
+      'selector': '[expr184]',
+      'expressions': [{
+        'type': expressionTypes.ATTRIBUTE,
+        'name': 'href',
+        'evaluate': function (scope) {
+          return scope.state.exportedDeckFile;
+        }
+      }, {
+        'type': expressionTypes.ATTRIBUTE,
+        'name': 'download',
+        'evaluate': function (scope) {
+          return scope.state.exportedDeckFilename;
+        }
+      }]
+    }, {
+      'redundantAttribute': 'expr185',
+      'selector': '[expr185]',
       'expressions': [{
         'type': expressionTypes.TEXT,
         'childNodeIndex': 0,
@@ -3858,8 +4225,18 @@ var _default = {
         }
       }]
     }, {
-      'redundantAttribute': 'expr22',
-      'selector': '[expr22]',
+      'redundantAttribute': 'expr186',
+      'selector': '[expr186]',
+      'expressions': [{
+        'type': expressionTypes.EVENT,
+        'name': 'onchange',
+        'evaluate': function (scope) {
+          return scope.importFileChosen;
+        }
+      }]
+    }, {
+      'redundantAttribute': 'expr187',
+      'selector': '[expr187]',
       'expressions': [{
         'type': expressionTypes.TEXT,
         'childNodeIndex': 0,
@@ -3874,8 +4251,8 @@ var _default = {
         }
       }]
     }, {
-      'redundantAttribute': 'expr23',
-      'selector': '[expr23]',
+      'redundantAttribute': 'expr188',
+      'selector': '[expr188]',
       'expressions': [{
         'type': expressionTypes.EVENT,
         'name': 'onclick',
@@ -3888,12 +4265,12 @@ var _default = {
       'evaluate': function (scope) {
         return scope.state.imported;
       },
-      'redundantAttribute': 'expr24',
-      'selector': '[expr24]',
+      'redundantAttribute': 'expr189',
+      'selector': '[expr189]',
       'template': template('Ok!', [])
     }, {
-      'redundantAttribute': 'expr25',
-      'selector': '[expr25]',
+      'redundantAttribute': 'expr190',
+      'selector': '[expr190]',
       'expressions': [{
         'type': expressionTypes.EVENT,
         'name': 'onclick',
@@ -3922,14 +4299,14 @@ var _default = {
 
   },
   'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<div expr26></div>', [{
+    return template('<div expr26="expr26"></div>', [{
       'type': bindingTypes.IF,
       'evaluate': function (scope) {
         return scope.props.show;
       },
       'redundantAttribute': 'expr26',
       'selector': '[expr26]',
-      'template': template('<h3>Welcome to Lightning Cards</h3><div><p>Your currently loaded deck is\r\n        <span expr27 class="decktitle"><!----></span></p><p>Your current practice setting is\r\n      <select expr28 class="setting"><option value="default">Default (Front->Back)</option><option value="reverse">Reverse (Back->Front)</option></select></p></div><div><button expr29>Start Practice</button><button expr30>See/Edit Deck</button></div>', [{
+      'template': template('<h3>Welcome to Lightning Cards</h3><div><p>Your currently loaded deck is\r\n        <span expr27="expr27" class="decktitle"> </span></p><p>Your current practice setting is\r\n      <select expr28="expr28" class="setting"><option value="default">Default (Front->Back)</option><option value="reverse">Reverse (Back->Front)</option></select></p></div><div><button expr29="expr29">Start Practice</button><button expr30="expr30">See/Edit Deck</button></div>', [{
         'redundantAttribute': 'expr27',
         'selector': '[expr27]',
         'expressions': [{
@@ -4078,9 +4455,9 @@ var _default = {
 
   },
   'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<div expr68><div expr69 class="question"><!----></div><div expr70 class="answer"></div><div expr71 class="synonym"></div></div><div expr74 class="card-answer asking"></div><div expr77 class="card-answer answered"></div>', [{
-      'redundantAttribute': 'expr68',
-      'selector': '[expr68]',
+    return template('<div expr69="expr69"><div expr70="expr70" class="question"> </div><div expr71="expr71" class="answer"></div><div expr72="expr72" class="synonym"></div></div><div expr75="expr75" class="card-answer asking"></div><div expr78="expr78" class="card-answer answered"></div>', [{
+      'redundantAttribute': 'expr69',
+      'selector': '[expr69]',
       'expressions': [{
         'type': expressionTypes.ATTRIBUTE,
         'name': 'class',
@@ -4089,13 +4466,13 @@ var _default = {
         }
       }]
     }, {
-      'redundantAttribute': 'expr69',
-      'selector': '[expr69]',
+      'redundantAttribute': 'expr70',
+      'selector': '[expr70]',
       'expressions': [{
         'type': expressionTypes.TEXT,
         'childNodeIndex': 0,
         'evaluate': function (scope) {
-          return ['\r\n    ', scope.props.showingFront ? scope.props.card.front : scope.props.card.back, '\r\n    '].join('');
+          return [scope.props.showingFront ? scope.props.card.front : scope.props.card.back].join('');
         }
       }]
     }, {
@@ -4103,14 +4480,14 @@ var _default = {
       'evaluate': function (scope) {
         return !scope.state.asking;
       },
-      'redundantAttribute': 'expr70',
-      'selector': '[expr70]',
-      'template': template('<!---->', [{
+      'redundantAttribute': 'expr71',
+      'selector': '[expr71]',
+      'template': template(' ', [{
         'expressions': [{
           'type': expressionTypes.TEXT,
           'childNodeIndex': 0,
           'evaluate': function (scope) {
-            return ['\r\n      ', scope.props.showingFront ? scope.props.card.back : scope.props.card.front, '\r\n    '].join('');
+            return [scope.props.showingFront ? scope.props.card.back : scope.props.card.front].join('');
           }
         }]
       }])
@@ -4119,37 +4496,15 @@ var _default = {
       'evaluate': function (scope) {
         return !scope.state.asking;
       },
-      'redundantAttribute': 'expr71',
-      'selector': '[expr71]',
-      'template': template('<span expr72 class="syn"></span><span expr73 class="syn"></span>', [{
+      'redundantAttribute': 'expr72',
+      'selector': '[expr72]',
+      'template': template('<span expr73="expr73" class="syn"></span><span expr74="expr74" class="syn"></span>', [{
         'type': bindingTypes.EACH,
         'getKey': null,
         'condition': function (scope) {
           return scope.props.showingFront;
         },
-        'template': template('<!---->', [{
-          'expressions': [{
-            'type': expressionTypes.TEXT,
-            'childNodeIndex': 0,
-            'evaluate': function (scope) {
-              return scope.syn;
-            }
-          }]
-        }]),
-        'redundantAttribute': 'expr72',
-        'selector': '[expr72]',
-        'itemName': 'syn',
-        'indexName': null,
-        'evaluate': function (scope) {
-          return scope.props.card.synBack;
-        }
-      }, {
-        'type': bindingTypes.EACH,
-        'getKey': null,
-        'condition': function (scope) {
-          return scope.props.showingFront === false;
-        },
-        'template': template('<!---->', [{
+        'template': template(' ', [{
           'expressions': [{
             'type': expressionTypes.TEXT,
             'childNodeIndex': 0,
@@ -4163,6 +4518,28 @@ var _default = {
         'itemName': 'syn',
         'indexName': null,
         'evaluate': function (scope) {
+          return scope.props.card.synBack;
+        }
+      }, {
+        'type': bindingTypes.EACH,
+        'getKey': null,
+        'condition': function (scope) {
+          return scope.props.showingFront === false;
+        },
+        'template': template(' ', [{
+          'expressions': [{
+            'type': expressionTypes.TEXT,
+            'childNodeIndex': 0,
+            'evaluate': function (scope) {
+              return scope.syn;
+            }
+          }]
+        }]),
+        'redundantAttribute': 'expr74',
+        'selector': '[expr74]',
+        'itemName': 'syn',
+        'indexName': null,
+        'evaluate': function (scope) {
           return scope.props.card.synFront;
         }
       }])
@@ -4171,11 +4548,11 @@ var _default = {
       'evaluate': function (scope) {
         return scope.state.asking;
       },
-      'redundantAttribute': 'expr74',
-      'selector': '[expr74]',
-      'template': template('<form><input expr75 id="answerinput" type="text" autocomplete="off" placeholder="Answer"/><button expr76 class="button-primary">Enter</button></form>', [{
-        'redundantAttribute': 'expr75',
-        'selector': '[expr75]',
+      'redundantAttribute': 'expr75',
+      'selector': '[expr75]',
+      'template': template('<form><input expr76="expr76" id="answerinput" type="text" autocomplete="off" placeholder="Answer"/><button expr77="expr77" class="button-primary">Enter</button></form>', [{
+        'redundantAttribute': 'expr76',
+        'selector': '[expr76]',
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'oninput',
@@ -4184,8 +4561,8 @@ var _default = {
           }
         }]
       }, {
-        'redundantAttribute': 'expr76',
-        'selector': '[expr76]',
+        'redundantAttribute': 'expr77',
+        'selector': '[expr77]',
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onclick',
@@ -4199,26 +4576,27 @@ var _default = {
       'evaluate': function (scope) {
         return !scope.state.asking;
       },
-      'redundantAttribute': 'expr77',
-      'selector': '[expr77]',
-      'template': template('<input expr78 type="text" disabled/><button expr79 class="button">Edit card</button><button expr80 id="nextbutton" class="button-primary">Next</button>', [{
+      'redundantAttribute': 'expr78',
+      'selector': '[expr78]',
+      'template': template('<input expr79="expr79" type="text" disabled/><button expr80="expr80" class="button">Edit card</button><button expr81="expr81" id="nextbutton" class="button-primary">Next</button>', [{
         'type': bindingTypes.IF,
         'evaluate': function (scope) {
           return !scope.state.asking;
         },
-        'redundantAttribute': 'expr78',
-        'selector': '[expr78]',
+        'redundantAttribute': 'expr79',
+        'selector': '[expr79]',
         'template': template(null, [{
           'expressions': [{
-            'type': expressionTypes.VALUE,
+            'type': expressionTypes.ATTRIBUTE,
+            'name': 'value',
             'evaluate': function (scope) {
               return scope.state.answerBox;
             }
           }]
         }])
       }, {
-        'redundantAttribute': 'expr79',
-        'selector': '[expr79]',
+        'redundantAttribute': 'expr80',
+        'selector': '[expr80]',
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onclick',
@@ -4227,8 +4605,8 @@ var _default = {
           }
         }]
       }, {
-        'redundantAttribute': 'expr80',
-        'selector': '[expr80]',
+        'redundantAttribute': 'expr81',
+        'selector': '[expr81]',
         'expressions': [{
           'type': expressionTypes.EVENT,
           'name': 'onclick',
@@ -4264,9 +4642,9 @@ var _default = {
 
   },
   'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<h3>Session done!</h3><p expr65><!----></p><div><button expr66>Practice again</button><button expr67>Edit deck</button></div>', [{
-      'redundantAttribute': 'expr65',
-      'selector': '[expr65]',
+    return template('<h3>Session done!</h3><p expr55="expr55"> </p><div><button expr56="expr56">Practice again</button><button expr57="expr57">Edit deck</button></div>', [{
+      'redundantAttribute': 'expr55',
+      'selector': '[expr55]',
       'expressions': [{
         'type': expressionTypes.TEXT,
         'childNodeIndex': 0,
@@ -4275,8 +4653,8 @@ var _default = {
         }
       }]
     }, {
-      'redundantAttribute': 'expr66',
-      'selector': '[expr66]',
+      'redundantAttribute': 'expr56',
+      'selector': '[expr56]',
       'expressions': [{
         'type': expressionTypes.EVENT,
         'name': 'onclick',
@@ -4285,8 +4663,8 @@ var _default = {
         }
       }]
     }, {
-      'redundantAttribute': 'expr67',
-      'selector': '[expr67]',
+      'redundantAttribute': 'expr57',
+      'selector': '[expr57]',
       'expressions': [{
         'type': expressionTypes.EVENT,
         'name': 'onclick',
@@ -4351,20 +4729,20 @@ var _default = {
 
   },
   'template': function (template, expressionTypes, bindingTypes, getComponent) {
-    return template('<div expr36></div>', [{
+    return template('<div expr37="expr37"></div>', [{
       'type': bindingTypes.IF,
       'evaluate': function (scope) {
         return scope.props.show;
       },
-      'redundantAttribute': 'expr36',
-      'selector': '[expr36]',
-      'template': template('<card-display expr37></card-display><card-edit expr38></card-edit><end-screen expr39></end-screen>', [{
+      'redundantAttribute': 'expr37',
+      'selector': '[expr37]',
+      'template': template('<card-display expr38="expr38"></card-display><card-edit expr39="expr39"></card-edit><end-screen expr40="expr40"></end-screen>', [{
         'type': bindingTypes.IF,
         'evaluate': function (scope) {
           return !scope.state.editing && !scope.props.outOfCards;
         },
-        'redundantAttribute': 'expr37',
-        'selector': '[expr37]',
+        'redundantAttribute': 'expr38',
+        'selector': '[expr38]',
         'template': template(null, [{
           'type': bindingTypes.TAG,
           'getComponent': getComponent,
@@ -4415,8 +4793,8 @@ var _default = {
         'evaluate': function (scope) {
           return scope.state.editing;
         },
-        'redundantAttribute': 'expr38',
-        'selector': '[expr38]',
+        'redundantAttribute': 'expr39',
+        'selector': '[expr39]',
         'template': template(null, [{
           'type': bindingTypes.TAG,
           'getComponent': getComponent,
@@ -4449,8 +4827,8 @@ var _default = {
         'evaluate': function (scope) {
           return scope.props.outOfCards;
         },
-        'redundantAttribute': 'expr39',
-        'selector': '[expr39]',
+        'redundantAttribute': 'expr40',
+        'selector': '[expr40]',
         'template': template(null, [{
           'type': bindingTypes.TAG,
           'getComponent': getComponent,

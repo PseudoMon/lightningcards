@@ -1,7 +1,11 @@
 <import-exporter>
   <div class="export">
     <h3>Deck Export</h3>
-    <p>Select everything in the textarea below and copy it somewhere safe.</p>
+    <p>Click the download button to save the backup file.</p>
+    <a class="button button-primary" href="{ state.exportedDeckFile }" download="{ state.exportedDeckFilename }">Download</a>
+    
+    <p>Alternatively, you can select everything in the textarea below and copy it somewhere safe.</p>
+
     <div>
       <textarea>{ state.exportedDeck }</textarea>
     </div>
@@ -10,13 +14,17 @@
   <div class="import">
     <h3>Import Deck</h3>
     <p>This will completely replace your current deck with the imported deck. If you want to keep your current deck, create a new deck in Manage Decks menu.</p>
-    <p>Paste card data below and click the button.</p>
+    <p>Open file or paste card data below and click the button.</p>
+
+    <input type="file" onchange={ importFileChosen }>
+
     <div>
       <textarea oninput={ changeImportText }>{ state.deckToImport }</textarea>
     </div>
     <div>
       <button onclick={ importDeck }>Click to import cards</button>
     </div>
+
     <h5 if={state.imported}>Ok!</h5>
   </div>
 
@@ -43,6 +51,7 @@
     onBeforeMount() {
       this.state = {
         exportedDeck: '',
+        exportedDeckFile: '',
         deckToImport: '',
         imported: false,
       }
@@ -54,11 +63,46 @@
 
     getDeckExport() {
       let cards = this.props.deck.cards
+
+      // only get deck's name and cards, none of the functions etc
       let deck = { name: this.props.deck.name, cards: cards }
       let exportedDeck = JSON.stringify(deck)
+
+      // this is the content of the downloadable file
+      let exportedDeckFile = "data:text/json;charset=utf-8," + encodeURIComponent(exportedDeck)
+      let exportedDeckFilename = this.createDeckFilename(deck)
+
       this.update({
-        exportedDeck: exportedDeck
+        exportedDeck,
+        exportedDeckFile,
+        exportedDeckFilename,
       })
+    },
+
+    createDeckFilename(deck) {
+      let safeName = encodeURIComponent(deck.name)
+        .toLowerCase()
+        .replace('%20', '-')
+
+      let name = "lightning-deck-" + safeName + ".json"
+      return name
+    },
+
+    importFileChosen(e) {
+      // When a file is selected for import, read its content and put it into the state that fills the textbox.
+      const theFile = e.target.files[0]
+
+      let reader = new FileReader()
+
+      reader.onload = (() => {
+        return (e) => {
+          this.update({
+            deckToImport: e.target.result
+          })
+        }
+      })()
+
+      reader.readAsText(theFile)
     },
 
     importDeck() {
